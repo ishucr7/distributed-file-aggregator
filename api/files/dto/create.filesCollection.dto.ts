@@ -1,4 +1,4 @@
-export interface CreateFilesDto {
+export interface CreateFilesCollectionDto {
     numberOfFiles: number;
     numberOfEntries: number;
 }
