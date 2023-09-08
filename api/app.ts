@@ -5,7 +5,8 @@ import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
 
 import {CommonRoutesConfig} from './common/common.routes.config';
-import {JobRoutes} from './jobs/jobs.routes.config';
+import {JobsRoutes} from './jobs/jobs.routes.config';
+import {FilesRoutes} from './files/files.routes.config';
 import debug from 'debug';
 
 const app: express.Application = express();
@@ -31,7 +32,8 @@ if (!process.env.DEBUG) {
 
 app.use(expressWinston.logger(loggerOptions));
 
-routes.push(new JobRoutes(app));
+routes.push(new JobsRoutes(app));
+routes.push(new FilesRoutes(app));
 
 const runningMessage = `Server running at http://localhost:${port}`;
 app.get('/', (req: express.Request, res: express.Response) => {
