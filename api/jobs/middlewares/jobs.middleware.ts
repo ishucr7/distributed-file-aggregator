@@ -6,19 +6,6 @@ const log: debug.IDebugger = debug('app:jobs-controller');
 
 class JobsMiddleware {
 
-	async validateRequiredJobBodyFields(
-		req: express.Request,
-		res: express.Response,
-		next: express.NextFunction
-	) {
-		if (req.body && req.body.filePaths && req.body.filePaths.length > 0) {
-			next();
-		} else {
-			res.status(400).send({
-				error: `filePaths must be provided with atleast 1 file path`,
-			});
-		}
-	}
 	async validateJobExists(
 		req: express.Request,
 		res: express.Response,
@@ -38,7 +25,7 @@ class JobsMiddleware {
 		res: express.Response,
 		next: express.NextFunction
 	) {
-		req.body.id = req.params.jobId;
+		req.body._id = req.params.jobId;
 		next();
 	}
 
