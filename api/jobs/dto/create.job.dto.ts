@@ -1,4 +1,3 @@
 export interface CreateJobDto {
-    id: string;
-    filePaths: string[];
+    s3FilePaths: string[];
 }
