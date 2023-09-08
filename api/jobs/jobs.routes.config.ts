@@ -15,11 +15,11 @@ export class JobsRoutes extends CommonRoutesConfig {
 			.route(`/jobs`)
 			.get(JobsController.listJobs)
 			.post(
-				body('s3FilePaths')
-					.isArray()
-					.isLength({min:1})
-					.withMessage('Must include s3FilePaths with atleast 1 file path'),
+				body('filesCollectionId')
+					.isString()
+					.withMessage('Must include filesCollectionId'),
 				BodyValidationMiddleware.verifyBodyFieldsErrors,
+				JobsMiddleWare.validateFilesCollectionExists,
 				JobsController.createJob
 			);
 

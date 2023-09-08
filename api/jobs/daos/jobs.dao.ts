@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import mongooseService from '../../common/services/mongoose.service';
 import { CreateJobDto } from "../dto/create.job.dto";
 import debug from 'debug';
@@ -12,7 +13,10 @@ class JobsDao {
 
 	jobSchema = new this.Schema({
 		_id: String,
-		s3FilePaths: [String],
+		fileCollection: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'FilesCollections'
+		},
 		permissionFlags: Number,
 	}, { id: false });
 

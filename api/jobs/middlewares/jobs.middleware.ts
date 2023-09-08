@@ -1,5 +1,6 @@
 import express from 'express';
 import jobService from '../services/jobs.service';
+import filesCollectionService from '../../files/services/filesCollection.service';
 import debug from 'debug';
 
 const log: debug.IDebugger = debug('app:jobs-controller');
@@ -20,6 +21,22 @@ class JobsMiddleware {
 			});
 		}
 	}
+
+	async validateFilesCollectionExists(
+		req: express.Request,
+		res: express.Response,
+		next: express.NextFunction
+	) {
+		const filesCollection = await filesCollectionService.readById(req.body.filesCollectionId);
+		if (filesCollection) {
+			next();
+		} else {
+			res.status(404).send({
+				error: `FilesCollection ${req.params.filesCollectionId} not found`,
+			});
+		}
+	}
+
 	async extractJobId(
 		req: express.Request,
 		res: express.Response,
