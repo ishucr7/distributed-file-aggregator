@@ -1,6 +1,8 @@
 import { CommonRoutesConfig } from '../common/common.routes.config';
 import JobsController from './controllers/jobs.controller';
 import JobsMiddleWare from './middlewares/jobs.middleware';
+import BodyValidationMiddleware from '../common/middlewares/body.validation.middleware';
+import { body } from 'express-validator';
 import express from 'express';
 
 export class JobsRoutes extends CommonRoutesConfig {
@@ -13,7 +15,11 @@ export class JobsRoutes extends CommonRoutesConfig {
 			.route(`/jobs`)
 			.get(JobsController.listJobs)
 			.post(
-				JobsMiddleWare.validateRequiredJobBodyFields,
+				body('s3FilePaths')
+					.isArray()
+					.isLength({min:1})
+					.withMessage('Must include s3FilePaths with atleast 1 file path'),
+				BodyValidationMiddleware.verifyBodyFieldsErrors,
 				JobsController.createJob
 			);
 
