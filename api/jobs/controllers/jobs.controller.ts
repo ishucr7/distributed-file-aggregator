@@ -14,7 +14,7 @@ class JobsController {
     }
 
     async getJobById(req: express.Request, res: express.Response) {
-        const job = await jobsService.readById(req.body.id);
+        const job = await jobsService.readById(req.params.jobId);
         res.status(200).send(job);
     }
 
