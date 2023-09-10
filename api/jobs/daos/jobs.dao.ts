@@ -1,10 +1,17 @@
-import mongoose from 'mongoose';
 import mongooseService from '../../common/services/mongoose.service';
 import { CreateJobDto } from "../dto/create.job.dto";
 import debug from 'debug';
 import shortid from 'shortid';
+import { PatchJobDto } from '../dto/patch.job.dto';
 
 const log: debug.IDebugger = debug('app:mongodb-dao');
+
+export enum JobStatus {
+	GeneratingFiles = 'Generating Files',
+	Processing = 'Processing',
+	Failed = 'Failed',
+	Completed = 'Completed'
+}
 
 class JobsDao {
 	jobs: Array<CreateJobDto> = [];
@@ -13,10 +20,14 @@ class JobsDao {
 
 	jobSchema = new this.Schema({
 		_id: String,
-		filesCollection: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'FilesCollections'
+		noOfFiles: Number,
+		numberOfEntriesPerFile: Number,
+		status: {
+			type: String,
+			enum: Object.values(JobStatus),
+			requried: true
 		},
+		filePaths: [String],
 		permissionFlags: Number,
 	}, { id: false });
 
@@ -36,8 +47,17 @@ class JobsDao {
 		return job;
 	}
 
+	async updateJobById(jobId: string, jobFields: PatchJobDto) {
+		const job = await this.Job.findOneAndUpdate(
+			{_id: jobId},
+			{$set: jobFields},
+			{new: true}
+		).exec();
+		return job;
+	}
+
 	async getJobById(jobId: string) {
-		return this.Job.findOne({ _id: jobId }).populate('filesCollection').exec();
+		return this.Job.findOne({ _id: jobId }).exec();
 	}
 
 	async getJobs(limit = 25, page = 0) {

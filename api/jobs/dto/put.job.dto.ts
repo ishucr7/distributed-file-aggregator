@@ -1,7 +1,8 @@
 import { JobStatus } from "../daos/jobs.dao";
 
-export interface CreateJobDto {
+export interface PutJobDto {
     numberOfFiles: number;
     numberOfEntriesPerFile: number;
-    status: JobStatus
+    status: JobStatus;
+    filePaths: string[];
 }

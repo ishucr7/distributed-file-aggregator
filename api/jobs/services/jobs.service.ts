@@ -1,6 +1,8 @@
-import JobsDao from '../daos/jobs.dao';
+import JobsDao, { JobStatus } from '../daos/jobs.dao';
 import { CRUD } from '../../common/interfaces/crud.interface';
 import { CreateJobDto } from '../dto/create.job.dto';
+import { DataGeneratorService } from '../../common/services/dataGenerator.service';
+
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import FilesCollectionDao from '../../files/daos/filesCollection.dao';
 
@@ -21,9 +23,18 @@ export interface Task {
 
 class JobsService implements CRUD {
 	async create(resource: CreateJobDto): Promise<string> {
-		const job = await JobsDao.addJob(resource);
-		const filesCollection = (await FilesCollectionDao.getFilesCollectionById(resource.filesCollectionId))!;
-		const filePaths = filesCollection.s3FilePaths;
+		let job = await JobsDao.addJob({
+			...resource,
+			status: JobStatus.GeneratingFiles,
+		});
+		const filePaths: string[] = DataGeneratorService.generateFiles({
+			noOfFiles: resource.numberOfFiles,
+			noOfNumbersPerFile: resource.numberOfEntriesPerFile,
+			outputDir: `/tmp/${job._id}`,
+		});
+		job = await JobsDao.updateJobById(job._id, {
+			status: JobStatus.Processing
+		})
 		const groups = groupFiles(filePaths, 5);
 
 		const tasks: Task[] = [];
