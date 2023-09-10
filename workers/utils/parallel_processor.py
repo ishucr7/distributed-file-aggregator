@@ -29,19 +29,3 @@ class ParallelProcessor:
             array = self.result_queue.get()
             result.append(array)
         return result
-
-    # @staticmethod
-    # def wait_for_all(processes):
-    #     for process in processes:
-    #         process.join()
-
-    # @staticmethod
-    # def process_items_parallely(items, target):
-    #     processes = []
-    #     result_queue = multiprocessing.Queue()
-    #     for item in items:
-    #         process = multiprocessing.Process(target=target, args=(item, result_queue))
-    #         processes.append([process])
-    #         process.start()
-    #     ParallelProcessor.wait_for_all(processes)
-
