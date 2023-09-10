@@ -13,7 +13,7 @@ class JobsDao {
 
 	jobSchema = new this.Schema({
 		_id: String,
-		fileCollection: {
+		filesCollection: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'FilesCollections'
 		},
@@ -33,11 +33,11 @@ class JobsDao {
 			permissionFlags: 1,
 		});
 		await job.save();
-		return jobId;
+		return job;
 	}
 
 	async getJobById(jobId: string) {
-		return this.Job.findOne({ _id: jobId }).exec();
+		return this.Job.findOne({ _id: jobId }).populate('filesCollection').exec();
 	}
 
 	async getJobs(limit = 25, page = 0) {
