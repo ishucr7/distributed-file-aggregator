@@ -31,6 +31,7 @@ class JobsService implements CRUD {
 			noOfNumbersPerFile: resource.numberOfEntriesPerFile,
 			outputDir: `/tmp/${job._id}`,
 		});
+		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
 		job.save();
 
