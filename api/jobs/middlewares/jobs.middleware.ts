@@ -1,6 +1,5 @@
 import express from 'express';
 import jobService from '../services/jobs.service';
-import filesCollectionService from '../../files/services/filesCollection.service';
 import debug from 'debug';
 
 const log: debug.IDebugger = debug('app:jobs-controller');
