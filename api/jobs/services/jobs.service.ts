@@ -4,7 +4,6 @@ import { CreateJobDto } from '../dto/create.job.dto';
 import { DataGeneratorService } from '../../common/services/dataGenerator.service';
 
 import rabbitmqService from '../../common/services/rabbitmq.service';
-import FilesCollectionDao from '../../files/daos/filesCollection.dao';
 
 const groupFiles = (files: string[], groupSize: number) => {
 	const groups: string[][] = [[]];
