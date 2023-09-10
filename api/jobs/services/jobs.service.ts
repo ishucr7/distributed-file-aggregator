@@ -32,9 +32,9 @@ class JobsService implements CRUD {
 			noOfNumbersPerFile: resource.numberOfEntriesPerFile,
 			outputDir: `/tmp/${job._id}`,
 		});
-		job = await JobsDao.updateJobById(job._id, {
-			status: JobStatus.Processing
-		})
+		job.status = JobStatus.Processing;
+		job.save();
+
 		const groups = groupFiles(filePaths, 5);
 
 		const tasks: Task[] = [];
