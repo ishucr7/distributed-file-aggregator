@@ -1,24 +1,20 @@
 import debug from 'debug';
+import * as fs from 'fs';
 
 const log: debug.IDebugger = debug('app:s3-service');
 
-class FileService {
-
-	constructor() {
-        // Set up boto3 client
-	}
-    
-    createFile(path: string, content: string) {
-
+export class FileService {
+    public static writeToFile(filePath: string, fileContent: string): void {
+        fs.writeFileSync(filePath, fileContent);
     }
 
-    deleteFile(path: string) {
-
+    public static doesPathExist(path: string): boolean {
+        return fs.existsSync(path);
     }
 
-    readFile(path: string) {
-        
+    public static createDir(path: string): void {
+        if (!fs.existsSync(path)) {
+            fs.mkdirSync(path);
+          }
     }
-
 }
-export default new FileService();
