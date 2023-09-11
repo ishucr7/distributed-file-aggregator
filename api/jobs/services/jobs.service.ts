@@ -4,6 +4,8 @@ import { CreateJobDto } from '../dto/create.job.dto';
 import { DataGeneratorService } from '../../common/services/dataGenerator.service';
 
 import rabbitmqService from '../../common/services/rabbitmq.service';
+import debug from 'debug';
+const log: debug.IDebugger = debug('app:job-service');
 
 const groupFiles = (files: string[], groupSize: number) => {
 	const groups: string[][] = [[]];
@@ -18,6 +20,14 @@ export interface Task {
 	id: string;
 	jobId: string;
 	filePaths: string[];
+}
+
+export interface CeleryTask {
+	id: string;
+	task: string;
+	kwargs: any;
+	args: Task[]
+	retries: number;
 }
 
 class JobsService implements CRUD {
@@ -37,17 +47,25 @@ class JobsService implements CRUD {
 
 		const groups = groupFiles(filePaths, 5);
 
-		const tasks: Task[] = [];
+		const tasks: CeleryTask[] = [];
 		groups.map((group, ind) => {
-			tasks.push({
-				id: `job-${job.id}-task-${ind}`,
+			const task: Task = {
+				id: `job-${job._id}-task-${ind}`,
 				jobId: job.id,
 				filePaths: group
+			}
+			tasks.push({
+				id: `job-${job._id}-task-${ind}`,
+				task: 'process-job',
+				kwargs: {},
+				args: [task],
+			    retries: 0,
 			})
 		});
 		await rabbitmqService.connectToRabbitMQ();
 		tasks.map((task) => {
 			const taskStr: string = JSON.stringify(task);
+			log(`Sending to rabbit mq, message: ${taskStr}`);
 			rabbitmqService.sendMessage(taskStr);
 		})
 		return job;
