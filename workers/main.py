@@ -1,5 +1,4 @@
 import json
-import shortuuid
 
 from task_manager import TaskManager
 from utils.logger import get_logger
@@ -21,7 +20,7 @@ def lambda_handler(event, context):
         s3_keys = []
         for file_message in job_group:
             s3_keys.append(file_message['s3FileKey'])
-        task_manager = TaskManager(job_id, shortuuid.uuid(), s3_keys)
+        task_manager = TaskManager(job_id, s3_keys)
         task_manager.process()
 
     return {
