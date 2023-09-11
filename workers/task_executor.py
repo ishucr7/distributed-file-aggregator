@@ -23,7 +23,7 @@ class TaskExecutor:
         chunk_sums = sum_processor.process()
         return sum_of_arrays(chunk_sums)
 
-    def process(self):
+    def execute(self):
         output_array = []
         arrays = self._read_arrays_from_files_parallely()
         if self.file_count >= 4:

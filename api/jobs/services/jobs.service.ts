@@ -20,6 +20,7 @@ export interface Task {
 	id: string;
 	jobId: string;
 	filePaths: string[];
+	outputDir: string;
 }
 
 export interface CeleryTask {
@@ -49,10 +50,12 @@ class JobsService implements CRUD {
 
 		const tasks: CeleryTask[] = [];
 		groups.map((group, ind) => {
+			const taskId = `task-${ind}`;
 			const task: Task = {
-				id: `job-${job._id}-task-${ind}`,
-				jobId: job.id,
-				filePaths: group
+				id: taskId,
+				jobId: job._id,
+				filePaths: group,
+				outputDir: `/tmp/dynamofl/jobs/${job._id}/tasks/${taskId}`
 			}
 			tasks.push({
 				id: `job-${job._id}-task-${ind}`,
