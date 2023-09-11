@@ -58,6 +58,18 @@ class RedisService {
 		return await this.client.SCARD(setName);
 	}
 
+	async pushToList(listName: string, value: string | string[]): Promise<number> {
+		return await this.client.LPUSH(listName, value);
+	}
+
+	async getListSize(listName: string): Promise<number> {
+		return await this.client.LLEN(listName);
+	}
+
+	async extractEntireList(listName: string): Promise<string[]> {
+		return await this.client.LRANGE(listName, 0, -1);
+	}
+
 	quit(): void {
 		this.client.quit();
 	}
