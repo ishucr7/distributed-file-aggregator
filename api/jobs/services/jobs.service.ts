@@ -5,30 +5,14 @@ import { DataGeneratorService } from '../../common/services/dataGenerator.servic
 import { FileService } from '../../common/services/file.service';
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import debug from 'debug';
+import { SQSService } from '../../common/services/sqs.service';
+import { env } from '../../common/constants';
 const log: debug.IDebugger = debug('app:job-service');
 
-const groupFiles = (files: string[], groupSize: number) => {
-	const groups: string[][] = [];
-	for(let i=0; i<files.length; i+=groupSize) {
-		const group = files.slice(i, i+groupSize);
-		groups.push(group);
-	}
-	return groups;
-}
-
-export interface Task {
+export interface FileMessage {
 	id: string;
 	jobId: string;
-	filePaths: string[];
-	outputDir: string;
-}
-
-export interface CeleryTask {
-	id: string;
-	task: string;
-	kwargs: any;
-	args: Task[]
-	retries: number;
+	s3FileKey: string;
 }
 
 class JobsService implements CRUD {
@@ -37,42 +21,37 @@ class JobsService implements CRUD {
 			...resource,
 			status: JobStatus.GeneratingFiles,
 		});
-		const filePaths: string[] = DataGeneratorService.generateFiles({
+		const s3FileKeys: string[] = await DataGeneratorService.generateFiles({
 			noOfFiles: resource.noOfFiles,
 			noOfEntriesPerFile: resource.noOfEntriesPerFile,
 			outputDir: `/tmp/dynamofl/jobs/${job._id}/`,
+			s3Key: `data/jobs/${job._id}/original-files`,
 		});
-		job.filePaths = filePaths;
+		job.s3FileKeys = s3FileKeys;
 		job.status = JobStatus.Processing;
 		job.save();
 
-		const groups = groupFiles(filePaths, 5);
-
-		const tasks: CeleryTask[] = [];
-		groups.map((group, ind) => {
-			const taskId = `task-${ind}`;
-			const outputDir = `/tmp/dynamofl/jobs/${job._id}/tasks/${taskId}`;
-			FileService.createDir(outputDir);
-			const task: Task = {
-				id: taskId,
+		const sqs = new SQSService(env.SQS_QUEUE_URL)
+		s3FileKeys.map(async (key, ind) => {
+			const fileMessageId = `fileMessage-${ind}`;
+			const message: FileMessage = {
+				id: fileMessageId,
 				jobId: job._id,
-				filePaths: group,
-				outputDir
-			}
-			tasks.push({
-				id: `job-${job._id}-task-${ind}`,
-				task: 'process-job',
-				kwargs: {},
-				args: [task],
-			    retries: 0,
-			})
+				s3FileKey: key,
+			};
+			const messageStr: string = JSON.stringify(message);
+			log(`Sending SQS queue, message: ${messageStr}`);
+			await sqs.sendMessage({
+				message: messageStr,
+				messageAttributes: {
+					jobId: {
+						DataType: "String",
+						StringValue: job._id,
+					}
+				},
+				messageGroupId: job._id,
+			});
 		});
-		await rabbitmqService.connectToRabbitMQ();
-		tasks.map((task) => {
-			const taskStr: string = JSON.stringify(task);
-			log(`Sending to rabbit mq, message: ${taskStr}`);
-			rabbitmqService.sendMessage(taskStr);
-		})
 		return job;
 	}
 

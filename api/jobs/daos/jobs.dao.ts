@@ -27,7 +27,7 @@ class JobsDao {
 			enum: Object.values(JobStatus),
 			requried: true
 		},
-		filePaths: [String],
+		s3FileKeys: [String],
 		permissionFlags: Number,
 	}, { id: false });
 

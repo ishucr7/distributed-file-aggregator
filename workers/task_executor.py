@@ -2,7 +2,7 @@ from utils.file_manager import FileManager
 from utils.parallel_processor import ParallelProcessor
 from utils.np import get_np_array, sum_of_arrays
 
-PARALLELIZE_EXECUTION = False
+PARALLELIZE_EXECUTION = True
 
 def extract_array_from_file(file_path):
     file_content = FileManager.read_file(file_path)
