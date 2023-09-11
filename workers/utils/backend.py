@@ -5,10 +5,10 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
-def send_processed_files(processed_files_paths, processed_files_paths):
+def send_processed_task_update(processed_files_paths, generated_file_path):
     data = {
         'processedFilesPaths': processed_files_paths,
-        'generatedFilePath': processed_files_paths
+        'generatedFilePath': generated_file_path
     }
     json_data = json.dumps(data)
     headers = {
