@@ -2,7 +2,7 @@ import JobsDao, { JobStatus } from '../daos/jobs.dao';
 import { CRUD } from '../../common/interfaces/crud.interface';
 import { CreateJobDto } from '../dto/create.job.dto';
 import { DataGeneratorService } from '../../common/services/dataGenerator.service';
-
+import { FileService } from '../../common/services/file.service';
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import debug from 'debug';
 const log: debug.IDebugger = debug('app:job-service');
@@ -51,11 +51,13 @@ class JobsService implements CRUD {
 		const tasks: CeleryTask[] = [];
 		groups.map((group, ind) => {
 			const taskId = `task-${ind}`;
+			const outputDir = `/tmp/dynamofl/jobs/${job._id}/tasks/${taskId}`;
+			FileService.createDir(outputDir);
 			const task: Task = {
 				id: taskId,
 				jobId: job._id,
 				filePaths: group,
-				outputDir: `/tmp/dynamofl/jobs/${job._id}/tasks/${taskId}`
+				outputDir
 			}
 			tasks.push({
 				id: `job-${job._id}-task-${ind}`,
