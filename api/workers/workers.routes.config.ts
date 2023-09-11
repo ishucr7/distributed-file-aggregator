@@ -4,9 +4,9 @@ import BodyValidationMiddleware from '../common/middlewares/body.validation.midd
 import { body } from 'express-validator';
 import express from 'express';
 
-export class JobsRoutes extends CommonRoutesConfig {
+export class WorkersRoutes extends CommonRoutesConfig {
 	constructor(app: express.Application) {
-		super(app, 'JobsRoutes');
+		super(app, 'WorkersRoutes');
 	}
 
 	configureRoutes() {
