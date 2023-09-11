@@ -8,9 +8,10 @@ const log: debug.IDebugger = debug('app:mongodb-dao');
 
 export enum JobStatus {
 	GeneratingFiles = 'Generating Files',
+	Aggregating = 'Aggregating',
 	Processing = 'Processing',
+	Completed = 'Completed',
 	Failed = 'Failed',
-	Completed = 'Completed'
 }
 
 class JobsDao {
