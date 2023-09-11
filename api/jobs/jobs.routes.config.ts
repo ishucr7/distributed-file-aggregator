@@ -15,11 +15,13 @@ export class JobsRoutes extends CommonRoutesConfig {
 			.route(`/jobs`)
 			.get(JobsController.listJobs)
 			.post(
-				body('filesCollectionId')
-					.isString()
-					.withMessage('Must include filesCollectionId'),
-				BodyValidationMiddleware.verifyBodyFieldsErrors,
-				JobsMiddleWare.validateFilesCollectionExists,
+				body('noOfFiles')
+					.isNumeric()
+					.withMessage('noOfFiles must be provided and its value > 1'),
+				body('noOfEntriesPerFile')
+					.isNumeric()
+					.withMessage('noOfEntriesPerFile must be provided and its value > 0'),
+					BodyValidationMiddleware.verifyBodyFieldsErrors,
 				JobsController.createJob
 			);
 

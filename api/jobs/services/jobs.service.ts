@@ -21,15 +21,15 @@ export interface Task {
 }
 
 class JobsService implements CRUD {
-	async create(resource: CreateJobDto): Promise<string> {
+	async create(resource: CreateJobDto) {
 		let job = await JobsDao.addJob({
 			...resource,
 			status: JobStatus.GeneratingFiles,
 		});
 		const filePaths: string[] = DataGeneratorService.generateFiles({
-			noOfFiles: resource.numberOfFiles,
-			noOfNumbersPerFile: resource.numberOfEntriesPerFile,
-			outputDir: `/tmp/${job._id}`,
+			noOfFiles: resource.noOfFiles,
+			noOfEntriesPerFile: resource.noOfEntriesPerFile,
+			outputDir: `/tmp/dynamofl/jobs/${job._id}/`,
 		});
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
@@ -50,7 +50,7 @@ class JobsService implements CRUD {
 			const taskStr: string = JSON.stringify(task);
 			rabbitmqService.sendMessage(taskStr);
 		})
-		return job.id;
+		return job;
 	}
 
 	async deleteById(id: string) {

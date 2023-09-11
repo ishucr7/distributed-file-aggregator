@@ -12,7 +12,7 @@ services:
       - "5672:5672"
       - "15672:15672" # RabbitMQ Management UI
     environment:
-      RABBITMQ_DEFAULT_USER: your_username
-      RABBITMQ_DEFAULT_PASS: your_password
+      RABBITMQ_DEFAULT_USER: dynamofl
+      RABBITMQ_DEFAULT_PASS: dynamofl
     volumes:
       - ./rabbitmq-data:/var/lib/rabbitmq

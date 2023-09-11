@@ -1,7 +1,7 @@
 import { JobStatus } from "../daos/jobs.dao";
 
 export interface CreateJobDto {
-    numberOfFiles: number;
-    numberOfEntriesPerFile: number;
+    noOfFiles: number;
+    noOfEntriesPerFile: number;
     status: JobStatus
 }

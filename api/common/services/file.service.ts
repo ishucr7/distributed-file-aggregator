@@ -14,7 +14,7 @@ export class FileService {
 
     public static createDir(path: string): void {
         if (!fs.existsSync(path)) {
-            fs.mkdirSync(path);
-          }
+            fs.mkdirSync(path, {recursive: true});
+        }
     }
 }
