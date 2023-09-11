@@ -1,10 +1,11 @@
 import * as amqp from 'amqplib';
+import { env } from '../constants';
 
 class RabbitMQService {
   private connection!: amqp.Connection;
   private channel!: amqp.Channel;
   private readonly queueName: string;
-  private readonly rabbitMQUrl = 'amqp://localhost';
+  private readonly rabbitMQUrl = `amqp://${env.RABBITMQ_DEFAULT_USER}:${env.RABBITMQ_DEFAULT_PASS}@localhost`;
 
   constructor(queueName: string) {
     this.queueName = queueName;
