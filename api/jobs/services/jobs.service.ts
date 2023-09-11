@@ -8,7 +8,7 @@ import debug from 'debug';
 const log: debug.IDebugger = debug('app:job-service');
 
 const groupFiles = (files: string[], groupSize: number) => {
-	const groups: string[][] = [[]];
+	const groups: string[][] = [];
 	for(let i=0; i<files.length; i+=groupSize) {
 		const group = files.slice(i, i+groupSize);
 		groups.push(group);
