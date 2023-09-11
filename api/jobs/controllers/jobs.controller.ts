@@ -27,6 +27,13 @@ class JobsController {
         log(await jobsService.deleteById(req.body.id));
         res.status(204).send();
     }
+
+    async processFiles(req: express.Request, res: express.Response) {
+        await jobsService.processFiles(req.params.jobId, req.body);
+        res.status(200).send({
+            message: "successfully processed files"
+        });
+    }
 }
 
 export default new JobsController();

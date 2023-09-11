@@ -33,6 +33,21 @@ export class JobsRoutes extends CommonRoutesConfig {
 			.get(JobsController.getJobById)
 			.delete(JobsController.removeJob);
 
+		this.app
+			.route(`/jobs/:jobId/processed-task`)
+			.all(JobsMiddleWare.validateJobExists)
+			.post(
+				body('processedFilesPaths')
+					.isArray()
+					.isLength({min: 1})
+					.withMessage('processedFilesPaths must be > 1'),
+				body('generatedFilePath')
+					.isString()
+					.withMessage('generatedFilePath must be present'),	
+				BodyValidationMiddleware.verifyBodyFieldsErrors,
+				JobsController.processFiles
+			)
+			.delete(JobsController.removeJob);
 		return this.app;
 	}
 }

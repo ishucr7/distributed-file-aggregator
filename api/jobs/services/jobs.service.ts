@@ -5,6 +5,9 @@ import { DataGeneratorService } from '../../common/services/dataGenerator.servic
 import { FileService } from '../../common/services/file.service';
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import debug from 'debug';
+import { ProcessFilesDto } from '../dto/processFiles.dto';
+import redisService from '../../common/services/redis.service';
+import { RedisPrefixes } from '../../common/constants';
 const log: debug.IDebugger = debug('app:job-service');
 
 const groupFiles = (files: string[], groupSize: number) => {
@@ -86,6 +89,29 @@ class JobsService implements CRUD {
 
 	async readById(id: string) {
 		return JobsDao.getJobById(id);
+	}
+
+	private async handleJobDsu(jobId: string, processedFilesInput: ProcessFilesDto) {
+		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
+		let jobSetValue = await redisService.getSet(jobSetKey);
+		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
+
+		const {generatedFilePath, processedFilesPaths} = processedFilesInput;
+		await redisService.addToSet(jobSetKey, generatedFilePath);
+		processedFilesPaths.map(async (key) => {
+			await redisService.removeFromSet(jobSetKey, key);
+		});
+		jobSetValue = await redisService.getSet(jobSetKey);
+		log(`Post Job DSU processing: jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
+	}
+
+	private async handleNewTaskGeneration(jobId: string, processedFilesInput: ProcessFilesDto) {
+		const jobSetKey = `${RedisPrefixes.JobCompletedTaskList}${jobId}`;
+	}
+
+	async processFiles(jobId: string, processedFilesInput: ProcessFilesDto) {
+		await this.handleJobDsu(jobId, processedFilesInput);
+		await this.handleNewTaskGeneration(jobId, processedFilesInput);
 	}
 }
 
