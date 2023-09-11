@@ -8,6 +8,10 @@ export class FileService {
         fs.writeFileSync(filePath, fileContent);
     }
 
+    public static readFileAsStr(filePath: string): string {
+        return fs.readFileSync(filePath, 'utf-8');
+    }
+
     public static doesPathExist(path: string): boolean {
         return fs.existsSync(path);
     }
