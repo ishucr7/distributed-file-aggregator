@@ -7,8 +7,8 @@ class ParallelProcessor:
         self.processes = []
         self.result_queue = multiprocessing.Queue()
 
-    def _target_wrapper(self, target):
-        result = target()
+    def _target_wrapper(self, args):
+        result = self.target(args)
         self.result_queue.put(result)
 
     def _wait_for_all_processes(self):
@@ -17,7 +17,7 @@ class ParallelProcessor:
 
     def _process_parallely(self):
         for item in self.items:
-            process = multiprocessing.Process(target=self._target_wrapper(self.target), args=(item))
+            process = multiprocessing.Process(target=self._target_wrapper, args=(item))
             self.processes.append([process])
             process.start()
 
