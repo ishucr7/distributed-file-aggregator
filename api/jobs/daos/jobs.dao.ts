@@ -21,7 +21,7 @@ class JobsDao {
 	jobSchema = new this.Schema({
 		_id: String,
 		noOfFiles: Number,
-		numberOfEntriesPerFile: Number,
+		noOfEntriesPerFile: Number,
 		status: {
 			type: String,
 			enum: Object.values(JobStatus),
@@ -37,6 +37,7 @@ class JobsDao {
 	}
 
 	async addJob(jobFields: CreateJobDto) {
+		log(`addJob => jobFields: ${JSON.stringify(jobFields)}`);
 		const jobId = shortid.generate();
 		const job = new this.Job({
 			_id: jobId,

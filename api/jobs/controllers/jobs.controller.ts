@@ -19,8 +19,8 @@ class JobsController {
     }
 
     async createJob(req: express.Request, res: express.Response) {
-        const jobId = await jobsService.create(req.body);
-        res.status(201).send({ id: jobId });
+        const job = await jobsService.create(req.body);
+        res.status(201).send(job);
     }
 
     async removeJob(req: express.Request, res: express.Response) {
