@@ -14,3 +14,6 @@
 ## Queue
 - no. of tasks in queue
 - no. of tasks of a job in queue
+
+## Celery command
+celery -A main worker --loglevel=INFO -Q dynamofl
