@@ -45,6 +45,7 @@ export class JobsRoutes extends CommonRoutesConfig {
 					.isString()
 					.withMessage('generatedFilePath must be present'),	
 				BodyValidationMiddleware.verifyBodyFieldsErrors,
+				JobsMiddleWare.validateJobIsNotInFailedState,
 				JobsController.processFiles
 			)
 			.delete(JobsController.removeJob);
