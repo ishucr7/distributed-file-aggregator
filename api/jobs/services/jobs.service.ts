@@ -32,11 +32,10 @@ class JobsService implements CRUD {
 		job.save();
 
 		const sqs = new SQSService(env.SQS_QUEUE_URL)
-		const messages: FileMessage[] = [];
 		s3FileKeys.map(async (key, ind) => {
-			const itemId = `item-${ind}`;
+			const fileMessageId = `fileMessage-${ind}`;
 			const message: FileMessage = {
-				id: itemId,
+				id: fileMessageId,
 				jobId: job._id,
 				s3FileKey: key,
 			};
