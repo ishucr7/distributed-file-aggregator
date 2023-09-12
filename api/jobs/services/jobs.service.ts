@@ -6,7 +6,7 @@ import { FileService } from '../../common/services/file.service';
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import { ProcessFilesDto } from '../dto/processFiles.dto';
 import redisService from '../../common/services/redis.service';
-import { RedisPrefixes } from '../../common/constants';
+import { GroupingSize, RedisPrefixes } from '../../common/constants';
 import debug from 'debug';
 import shortid from 'shortid';
 import jobsDao from '../daos/jobs.dao';
@@ -62,7 +62,7 @@ class JobsService implements CRUD {
 	}
 
 	private generateCeleryTasksFromFilePaths(filePaths: string[], jobId: string): CeleryTask[] {
-		const groups = groupFiles(filePaths, 5);
+		const groups = groupFiles(filePaths, GroupingSize);
 		const celeryTasks: CeleryTask[] = [];
 		groups.map((group) => {
 			const celeryTask: CeleryTask = this.generateTaskFromGroup(group, jobId); 
