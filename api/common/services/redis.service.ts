@@ -66,8 +66,17 @@ class RedisService {
 		return await this.client.LLEN(listName);
 	}
 
-	async extractEntireList(listName: string): Promise<string[]> {
-		return await this.client.LRANGE(listName, 0, -1);
+	async atomicGetAndDeleteEntireList(listName: string): Promise<string[]> {
+		const [ extractedList, trimmedResponse] = await this.client
+			.multi()
+			.LRANGE(listName, 0, -1)
+			.LTRIM(listName, 1,0)
+			.exec();
+		if (trimmedResponse === "OK")
+			return extractedList as string[];
+		else {
+			throw new Error(`Couldn't remove/trimg the list :${listName}`)
+		}
 	}
 
 	quit(): void {

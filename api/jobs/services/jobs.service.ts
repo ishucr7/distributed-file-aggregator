@@ -148,12 +148,13 @@ class JobsService implements CRUD {
 		const {generatedFilePath} = processedFilesInput;
 		await redisService.pushToList(jobCompletedTaskListKey, generatedFilePath);
 		const size = await redisService.getListSize(jobCompletedTaskListKey);
+		log(`Completed task List size: ${size}`)
 		if (size > 1) {
-			log(`Completed task List size > 1; size: ${size}`)
-			const completedTaskFilesPaths = await redisService.extractEntireList(jobCompletedTaskListKey);
+			const completedTaskFilesPaths = await redisService.atomicGetAndDeleteEntireList(jobCompletedTaskListKey);
 			log(`Completed Task List: ${completedTaskFilesPaths}`);
 			// A double check if in case some other process caused to extract the entire list after the size > 1 check
 			if(completedTaskFilesPaths.length > 0) {
+				log(`Sending completed tasks to the queue for processing`);
 				const tasks = this.generateCeleryTasksFromFilePaths(completedTaskFilesPaths, jobId);
 				await this.sendTasksToQueue(tasks);
 			}
