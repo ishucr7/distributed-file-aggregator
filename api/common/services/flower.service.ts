@@ -55,7 +55,7 @@ export class FlowerService extends HttpService {
             return worker;
         } catch(error) {
             logger.error(`Error in getting worker ${error}`);
-            return null;
+            throw error;
         }
     }
 
