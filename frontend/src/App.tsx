@@ -1,21 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Box from '@mui/material/Box';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import {BaseTabs} from './components/base/tabs/tab';
 import MetricsComponent from './components/metrics';
 import { JobsDashboard } from './components/jobs';
 import { JobService } from './services/jobService';
-import axios, { AxiosHeaders } from 'axios';
+
+import axios from 'axios';
 import { WorkerService } from './services/workerService';
 
 // const apiBaseUrl = 'http://localhost:3000'
-const apiBaseUrl = 'https://expert-goldfish-6vvwrpj7p9whg4x-3000.app.github.dev';
+const apiBaseUrl = 'https://special-enigma-5vv549wp5rxfwpj-3000.app.github.dev';
 
 function App() {
   const endpoint = axios.create({
     baseURL: apiBaseUrl,
     timeout: 30000,
   });
+
   const jobService = new JobService(endpoint);
   const workerService = new WorkerService(endpoint);
 
@@ -29,11 +33,36 @@ function App() {
     busyWorkers: 7,
   };
   return (
-    <Box>
-        <JobsDashboard
-          jobService={jobService}
-          workerService={workerService}
-        />
+    <Box sx={{flexGrow: 1}}>
+      <AppBar position='static'>
+        <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              DynamoFL File Processing
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      <BaseTabs
+        tabs={[
+          {
+            label: 'Workers and Jobs',
+            children: (
+              <JobsDashboard
+                jobService={jobService}
+                workerService={workerService}
+              />    
+            )
+          },
+          {
+            label: 'Statistics',
+            children: (
+              <MetricsComponent
+                queueMetrics={queueMetrics}
+                workerMetrics={workerMetrics}
+              />    
+            )
+          }
+        ]}
+      />
     </Box>
   );
 }
