@@ -11,6 +11,14 @@ export const JobColumnsFactory = (
     label: 'Status'
   },
   {
+    name: 'noOfFiles',
+    label: 'No. of Files'
+  },
+  {
+    name: 'noOfEntriesPerFile',
+    label: 'No. of entries/file'
+  },
+  {
     name: 'progress',
     label: 'Progress'
   }

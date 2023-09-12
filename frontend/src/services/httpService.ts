@@ -1,5 +1,4 @@
 import { AxiosInstance, AxiosError } from 'axios';
-import {objectToCamel, objectToSnake} from 'ts-case-convert';
 import { getServiceError } from './utils/serviceError';
 
 export interface ApiError {

@@ -5,7 +5,7 @@ import { AxiosInstance } from 'axios';
 
 export interface CreateJobInput {
     noOfFiles: number;
-    noOfEntriesPerfile: number;
+    noOfEntriesPerFile: number;
 }
 
 export interface Job extends CreateJobInput {

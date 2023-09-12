@@ -83,7 +83,7 @@ export function JobsDashboard({
     jobService
       .createJob({
         noOfFiles: Number(noOfFilesState[0]),
-        noOfEntriesPerfile: Number(noOfEntriesPerFileState[0])
+        noOfEntriesPerFile: Number(noOfEntriesPerFileState[0])
       })
       .then((result) => {
         result
@@ -172,8 +172,6 @@ export function JobsDashboard({
             <LinearProgress />
           )}
         </BaseModal>
-        {apiError && <Alert severity="error">{apiError}</Alert>}
-        {apiSuccess && <Alert severity="success">{apiSuccess}</Alert>}
           <MUIDataTable
             title={"Jobs"}
             data={jobs}
