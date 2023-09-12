@@ -93,6 +93,8 @@ class JobsService implements CRUD {
 		});
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
+		// Excluding the file generation out of the processing time
+		job.processingStartTime = new Date();
 		await job.save();
 		this.addInitialFilesToJobDsu(job._id, filePaths);
 		const tasks = this.generateCeleryTasksFromFilePaths(filePaths, job._id);
@@ -203,6 +205,7 @@ class JobsService implements CRUD {
 				await job.save();
 				await this.performAggregation(jobId, job.noOfFiles!);
 				job.status = JobStatus.Completed;
+				job.processingCompleteTime = new Date();
 				await job.save();
 			}	
 		} catch(err) {
@@ -213,6 +216,7 @@ class JobsService implements CRUD {
 	}
 
 	async linearValidator(jobId: string): Promise<LinerValidatorResponse> {
+		const startTime = new Date();
 		const job = (await jobsDao.getJobById(jobId))!;
 		const noOfFiles = job.noOfFiles;
 
@@ -235,10 +239,13 @@ class JobsService implements CRUD {
 		const outputBySystemFilePath: string = `/tmp/dynamofl/jobs/${jobId}/final.txt`;
 		FileService.writeToFile(linearFilePath, outputData);
 		const outputBySystem: string = FileService.readFileAsStr(outputBySystemFilePath)
+		const endTime = new Date();
 		return {
 			isSame: outputBySystem === outputData,
 			linearFilePath,
-			outputBySystemFilePath
+			outputBySystemFilePath,
+			linearProcessingTime: endTime.getTime() - startTime.getTime(),
+			systemProcessingTime: job.processingCompleteTime!.getTime() - job.processingStartTime!.getTime()
 		}
 	}
 }

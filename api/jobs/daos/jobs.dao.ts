@@ -25,6 +25,12 @@ class JobsDao {
 			type: Number,
 			required: true,
 		},
+		processingStartTime: {
+			type: Date
+		},
+		processingCompleteTime: {
+			type: Date
+		},
 		noOfEntriesPerFile: {
 			type: Number,
 			required: true,
