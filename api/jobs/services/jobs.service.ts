@@ -82,6 +82,7 @@ class JobsService implements CRUD {
 	async create(resource: CreateJobDto) {
 		let job = await JobsDao.addJob({
 			...resource,
+			progress: 0,
 			status: JobStatus.GeneratingFiles,
 		});
 		const filePaths: string[] = DataGeneratorService.generateFiles({
@@ -91,7 +92,7 @@ class JobsService implements CRUD {
 		});
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
-		job.save();
+		await job.save();
 		this.addInitialFilesToJobDsu(job._id, filePaths);
 		const tasks = this.generateCeleryTasksFromFilePaths(filePaths, job._id);
 		await this.sendTasksToQueue(tasks);
@@ -122,8 +123,9 @@ class JobsService implements CRUD {
 
 	private async handleJobDsu(jobId: string, processedFilesInput: ProcessFilesDto) {
 		log(`handleJobDsu: entered`);
+		const job = (await jobsDao.getJobById(jobId))!;
 		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
-		let jobSetValue = await redisService.getSet(jobSetKey);
+		let jobSetValue: string[] = await redisService.getSet(jobSetKey);
 		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
 
 		const {generatedFilePath, processedFilesPaths} = processedFilesInput;
@@ -139,6 +141,9 @@ class JobsService implements CRUD {
 			await redisService.removeFromSet(jobSetKey, key);
 		});
 		jobSetValue = await redisService.getSet(jobSetKey);
+		job.progress = ((job.noOfFiles - jobSetValue.length + 1)*100)/job.noOfFiles;
+		await job.save();
+		log(`Progress of the job: ${jobId} is ${job.progress}`);
 		log(`Post Job DSU processing: jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
 	}
 
@@ -194,15 +199,15 @@ class JobsService implements CRUD {
 			const shouldCalculateAggregate = await this.shouldCalculateAggregate(jobId);
 			if (shouldCalculateAggregate) {
 				job.status = JobStatus.Aggregating;
-				job.save();
+				await job.save();
 				await this.performAggregation(jobId, job.noOfFiles!);
 				job.status = JobStatus.Completed;
-				job.save();
+				await job.save();
 			}	
 		} catch(err) {
 			logger.error(`Error in process files: ${err}`);
 			job.status = JobStatus.Failed;
-			job.save();
+			await job.save();
 		}
 	}
 }

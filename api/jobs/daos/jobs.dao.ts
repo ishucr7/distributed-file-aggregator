@@ -21,8 +21,18 @@ class JobsDao {
 
 	jobSchema = new this.Schema({
 		_id: String,
-		noOfFiles: Number,
-		noOfEntriesPerFile: Number,
+		noOfFiles: {
+			type: Number,
+			required: true,
+		},
+		noOfEntriesPerFile: {
+			type: Number,
+			required: true,
+		},
+		progress: {
+			type: Number,
+			required: true,
+		},
 		status: {
 			type: String,
 			enum: Object.values(JobStatus),
