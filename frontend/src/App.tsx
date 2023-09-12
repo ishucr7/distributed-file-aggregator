@@ -1,25 +1,40 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Box from '@mui/material/Box';
+import MetricsComponent from './components/metrics';
+import { JobsDashboard } from './components/jobs';
+import { JobService } from './services/jobService';
+import axios, { AxiosHeaders } from 'axios';
+import { WorkerService } from './services/workerService';
+
+// const apiBaseUrl = 'http://localhost:3000'
+const apiBaseUrl = 'https://expert-goldfish-6vvwrpj7p9whg4x-3000.app.github.dev';
 
 function App() {
+  const endpoint = axios.create({
+    baseURL: apiBaseUrl,
+    timeout: 30000,
+  });
+  const jobService = new JobService(endpoint);
+  const workerService = new WorkerService(endpoint);
+
+  const queueMetrics = {
+    tasksInQueue: 10,
+    jobsInQueue: 5,
+  };
+
+  const workerMetrics = {
+    idleWorkers: 3,
+    busyWorkers: 7,
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box>
+        <JobsDashboard
+          jobService={jobService}
+          workerService={workerService}
+        />
+    </Box>
   );
 }
 
