@@ -7,6 +7,9 @@ class WorkersService  {
 	async modifyPoolSize(resource: CreateWorkerDto) {
 		return await flowerService.modifyPoolSize(resource.noOfWorkers);
 	}
+	async getWorker() {
+		return await flowerService.getWorker();
+	}
 }
 
 export default new WorkersService();

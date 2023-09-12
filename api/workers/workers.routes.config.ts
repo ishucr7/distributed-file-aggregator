@@ -18,6 +18,8 @@ export class WorkersRoutes extends CommonRoutesConfig {
 					.withMessage('noOfWorkers must be provided and its value > 0'),
 				BodyValidationMiddleware.verifyBodyFieldsErrors,
 				WorkersController.modifyPoolSize
+			).get(
+				WorkersController.getWorker
 			);
 		return this.app;
 	}

@@ -2,6 +2,9 @@ import logger from '../logger';
 import { WorkerName, env } from '../constants';
 import { HttpService } from './http.service';
 import axios, { AxiosInstance } from 'axios';
+import debug from 'debug';
+
+const log: debug.IDebugger = debug('app:workers-controller');
 
 
 interface Queue {
@@ -9,7 +12,8 @@ interface Queue {
 }
 
 interface Pool {
-    "max-concurrency": number;
+    maxConcurrency: number;
+    processes: number[];
 }
 
 interface Stats {
@@ -44,8 +48,9 @@ export class FlowerService extends HttpService {
     public async getWorker(): Promise<Worker|null> {
         const urlPath = `api/workers`
         try {
-            const response: Workers = await this.endpoint.get(urlPath);
-            const worker: Worker = response[`${WorkerName}`];
+            const response: {data: Workers} = await this.endpoint.get(urlPath, {});
+            log(`Worker api response data ${response.data}`)
+            const worker: Worker = response.data[`${WorkerName}`];
             return worker;
         } catch(error) {
             logger.error(`Error in getting worker ${error}`);
@@ -55,32 +60,37 @@ export class FlowerService extends HttpService {
 
     private async growPoolSize(workerName: string, by: number): Promise<PoolSizeRequestResponse> {
         const urlPath = `api/worker/pool/grow/${workerName}?n=${by}`;
-        const response: PoolSizeRequestResponse = await this.endpoint.post(urlPath);
-        return response;
+        const response: {data: PoolSizeRequestResponse} = await this.endpoint.post(urlPath);
+        return response.data;
     }
 
     private async shrinkPoolSize(workerName: string, by: number): Promise<PoolSizeRequestResponse> {
         const urlPath = `api/worker/pool/shrink/${workerName}?n=${by}`;
-        const response: PoolSizeRequestResponse = await this.endpoint.post(urlPath);
-        return response;
+        const response:{data: PoolSizeRequestResponse} = await this.endpoint.post(urlPath);
+        return response.data;
     }
 
     public async modifyPoolSize(newSize: number): Promise<PoolSizeRequestResponse|null> {
         try {
+            log(`Entered modifyPoolSize to new size: ${newSize}`);
             const worker: Worker = (await this.getWorker())!;
-            const currentPoolSize = worker.stats.pool['max-concurrency'];
+            const currentPoolSize = worker.stats.pool.processes.length;
+            log(`Existing pool size: ${currentPoolSize}`);
+
+            let response: PoolSizeRequestResponse;
             if (newSize > currentPoolSize) {
-                return await this.growPoolSize(WorkerName, newSize-currentPoolSize);
+                response = await this.growPoolSize(WorkerName, newSize-currentPoolSize);
             } else if(newSize < currentPoolSize) {
-                return await this.shrinkPoolSize(WorkerName, currentPoolSize - newSize);
+                response = await this.shrinkPoolSize(WorkerName, currentPoolSize - newSize);
             } else {
-                return {
+                response = {
                     message: `Already at the same size ${newSize}`
                 }
             }
+            return response;
         } catch (error) {
             logger.error(`Error in modifying pool size: ${error}`);
-            return null;
+            throw error;
         }
     }
 }
