@@ -1,11 +1,11 @@
 import requests
 import json
-from constants import BACKEND_ENDPOINT
-from logger import get_logger
+from utils.constants import BACKEND_ENDPOINT
+from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-def send_processed_task_update(processed_files_paths, generated_file_path):
+def send_processed_task_update(job_id, processed_files_paths, generated_file_path):
     data = {
         'processedFilesPaths': processed_files_paths,
         'generatedFilePath': generated_file_path
@@ -14,7 +14,8 @@ def send_processed_task_update(processed_files_paths, generated_file_path):
     headers = {
         'Content-Type': 'application/json',
     }
-    response = requests.post(url, data=json_data, headers=headers)
+    response = requests.post(f"{BACKEND_ENDPOINT}/jobs/{job_id}/processed-task", data=json_data, headers=headers)
+    logger.info(f'Sent request to processed task endpoint with body: {data} for job: {job_id}')
     if response.status_code == 200:
         logger.info('POST request was successful. Response:')
         logger.info(response.text)

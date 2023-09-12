@@ -42,7 +42,7 @@ class RedisService {
 		await this.client.del(key);
 	}
 
-	async addToSet(setName: string, value: string) {
+	async addToSet(setName: string, value: string|string[]) {
 		await this.client.SADD(setName, value);
 	}
 

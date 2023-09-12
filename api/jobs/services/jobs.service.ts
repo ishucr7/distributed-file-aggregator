@@ -10,6 +10,7 @@ import { RedisPrefixes } from '../../common/constants';
 import debug from 'debug';
 import shortid from 'shortid';
 import jobsDao from '../daos/jobs.dao';
+import logger from '../../common/logger';
 
 const log: debug.IDebugger = debug('app:job-service');
 
@@ -91,6 +92,7 @@ class JobsService implements CRUD {
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
 		job.save();
+		this.addInitialFilesToJobDsu(job._id, filePaths);
 		const tasks = this.generateCeleryTasksFromFilePaths(filePaths, job._id);
 		await this.sendTasksToQueue(tasks);
 		return job;
@@ -108,7 +110,18 @@ class JobsService implements CRUD {
 		return JobsDao.getJobById(id);
 	}
 
+	private async addInitialFilesToJobDsu(jobId: string, initialFilesPaths: string[]) {
+		log(`addInitialFilesToJobDsu: entered`);
+		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
+		let jobSetValue = await redisService.getSet(jobSetKey);
+		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
+		await redisService.addToSet(jobSetKey, initialFilesPaths);
+		jobSetValue = await redisService.getSet(jobSetKey);
+		log(`Post Job initial DSU processing: jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
+	}
+
 	private async handleJobDsu(jobId: string, processedFilesInput: ProcessFilesDto) {
+		log(`handleJobDsu: entered`);
 		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
 		let jobSetValue = await redisService.getSet(jobSetKey);
 		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
@@ -130,26 +143,31 @@ class JobsService implements CRUD {
 	}
 
 	private async handleNewTaskGeneration(jobId: string, processedFilesInput: ProcessFilesDto) {
+		log(`handleNewTaskGeneration: entered`);
 		const jobCompletedTaskListKey = `${RedisPrefixes.JobCompletedTaskList}${jobId}`;
 		const {generatedFilePath} = processedFilesInput;
 		await redisService.pushToList(jobCompletedTaskListKey, generatedFilePath);
 		const size = await redisService.getListSize(jobCompletedTaskListKey);
 		if (size > 1) {
+			log(`Completed task List size > 1; size: ${size}`)
 			const completedTaskFilesPaths = await redisService.extractEntireList(jobCompletedTaskListKey);
+			log(`Completed Task List: ${completedTaskFilesPaths}`);
 			// A double check if in case some other process caused to extract the entire list after the size > 1 check
 			if(completedTaskFilesPaths.length > 0) {
 				const tasks = this.generateCeleryTasksFromFilePaths(completedTaskFilesPaths, jobId);
 				await this.sendTasksToQueue(tasks);
 			}
-		}		
+		}
 	}
 
 	private async shouldCalculateAggregate(jobId: string): Promise<boolean> {
+		log(`shouldCalculateAggregate: entered`);
 		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
 		let jobSetValue = await redisService.getSet(jobSetKey);
 		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
 		const jobDsuSetSize = await redisService.getSetSize(jobSetKey);
 		if (jobDsuSetSize == 1) {
+			log(`jobDsuSetSize is 1, so yes aggregate should be calculated`);
 			return true;
 		} else {
 			return false;
@@ -163,10 +181,11 @@ class JobsService implements CRUD {
 		const numbers: number[] = fileContent.split(' ').map(Number);
 		const dividedNumbers: number[] = numbers.map((num) => num/noOfFiles!)
 		const finalFileResult = dividedNumbers.join(' ');
-		FileService.writeToFile(`/tmp/jobs/${jobId}/final.txt`, finalFileResult);
+		FileService.writeToFile(`/tmp/dynamofl/jobs/${jobId}/final.txt`, finalFileResult);
 	}
 
 	async processFiles(jobId: string, processedFilesInput: ProcessFilesDto) {
+		log(`processFiles: entered with input ${JSON.stringify(processedFilesInput)}`);
 		const job = (await jobsDao.getJobById(jobId))!;
 		try {
 			await this.handleJobDsu(jobId, processedFilesInput);
@@ -180,6 +199,7 @@ class JobsService implements CRUD {
 				job.save();
 			}	
 		} catch(err) {
+			logger.error(`Error in process files: ${err}`);
 			job.status = JobStatus.Failed;
 			job.save();
 		}
