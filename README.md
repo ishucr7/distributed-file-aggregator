@@ -16,4 +16,5 @@
 - no. of tasks of a job in queue
 
 ## Celery command
-celery -A main worker --loglevel=INFO -Q dynamofl
+celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl
+export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower
