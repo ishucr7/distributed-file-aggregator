@@ -3,6 +3,7 @@ import * as http from 'http';
 
 import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
+import cors from 'cors';
 
 import {CommonRoutesConfig} from './common/common.routes.config';
 import {JobsRoutes} from './jobs/jobs.routes.config';
@@ -16,6 +17,7 @@ const routes: Array<CommonRoutesConfig> = [];
 const debugLog: debug.IDebugger = debug('app');
 
 app.use(express.json());
+app.use(cors());
 
 const loggerOptions: expressWinston.LoggerOptions = {
     transports: [new winston.transports.Console()],
