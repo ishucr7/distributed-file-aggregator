@@ -34,6 +34,12 @@ class JobsController {
             message: "successfully processed files"
         });
     }
+
+    async linearValidator(req: express.Request, res: express.Response) {
+        const response = await jobsService.linearValidator(req.params.jobId);
+        res.status(200).send(response);
+    }
+
 }
 
 export default new JobsController();

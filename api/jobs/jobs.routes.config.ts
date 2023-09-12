@@ -34,6 +34,14 @@ export class JobsRoutes extends CommonRoutesConfig {
 			.delete(JobsController.removeJob);
 
 		this.app
+			.route(`/jobs/:jobId/linear-validator`)
+			.all(JobsMiddleWare.validateJobExists)
+			.post(
+				JobsMiddleWare.validateJobIsNotInFailedState,
+				JobsController.linearValidator
+			)
+
+		this.app
 			.route(`/jobs/:jobId/processed-task`)
 			.all(JobsMiddleWare.validateJobExists)
 			.post(
@@ -48,7 +56,6 @@ export class JobsRoutes extends CommonRoutesConfig {
 				JobsMiddleWare.validateJobIsNotInFailedState,
 				JobsController.processFiles
 			)
-			.delete(JobsController.removeJob);
 		return this.app;
 	}
 }

@@ -11,6 +11,7 @@ import debug from 'debug';
 import shortid from 'shortid';
 import jobsDao from '../daos/jobs.dao';
 import logger from '../../common/logger';
+import { LinerValidatorResponse } from '../dto/linearValidator.response.dto';
 
 const log: debug.IDebugger = debug('app:job-service');
 
@@ -208,6 +209,36 @@ class JobsService implements CRUD {
 			logger.error(`Error in process files: ${err}`);
 			job.status = JobStatus.Failed;
 			await job.save();
+		}
+	}
+
+	async linearValidator(jobId: string): Promise<LinerValidatorResponse> {
+		const job = (await jobsDao.getJobById(jobId))!;
+		const noOfFiles = job.noOfFiles;
+
+		const allFilesArrays: number[][] = [];
+		job.filePaths.forEach((filePath) => {
+			const fileData = FileService.readFileAsStr(filePath);
+			const numbers = fileData.trim().split(' ').map(Number);
+			allFilesArrays.push(numbers);
+		})
+
+		const sums: number[] = allFilesArrays.reduce((finalSum, numbers) => {
+			numbers.forEach((num, ind) => {
+				finalSum[ind] = (finalSum[ind] || 0) + num;
+			});
+			return finalSum;
+		});
+		const averages = sums.map((sum) => sum / noOfFiles);
+		const outputData: string = averages.join(' ');
+		const linearFilePath: string = `/tmp/dynamofl/jobs/${jobId}/linear.txt`;
+		const outputBySystemFilePath: string = `/tmp/dynamofl/jobs/${jobId}/final.txt`;
+		FileService.writeToFile(linearFilePath, outputData);
+		const outputBySystem: string = FileService.readFileAsStr(outputBySystemFilePath)
+		return {
+			isSame: outputBySystem === outputData,
+			linearFilePath,
+			outputBySystemFilePath
 		}
 	}
 }
