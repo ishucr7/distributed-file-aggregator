@@ -17,4 +17,4 @@
 
 ## Celery command
 celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
-export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower
+export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
