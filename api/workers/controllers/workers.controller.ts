@@ -10,9 +10,17 @@ class WorkersController {
         const response = await workersService.modifyPoolSize(req.body);
         res.status(200).send(response);
     }
+
     async getWorker(req: express.Request, res: express.Response) {
         const worker = await workersService.getWorker();
         res.status(200).send(worker);
+    }
+
+    async getNoOfTasksInQueue(req: express.Request, res: express.Response) {
+        const noOfTasks = await workersService.getNoOfTasksInQueue();
+        res.status(200).send({
+            noOfTasks
+        });
     }
 }
 

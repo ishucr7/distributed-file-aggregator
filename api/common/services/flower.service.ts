@@ -9,6 +9,7 @@ const log: debug.IDebugger = debug('app:workers-controller');
 
 interface Queue {
     name: string;
+    messages?: number;
 }
 
 interface Pool {
@@ -45,12 +46,12 @@ export class FlowerService extends HttpService {
         super(endpoint);
     }
 
-    public async getWorker(): Promise<Worker|null> {
+    public async getWorker(workerName: string): Promise<Worker|null> {
         const urlPath = `api/workers`
         try {
             const response: {data: Workers} = await this.endpoint.get(urlPath, {});
             log(`Worker api response data ${response.data}`)
-            const worker: Worker = response.data[`${WorkerName}`];
+            const worker: Worker = response.data[`${workerName}`];
             return worker;
         } catch(error) {
             logger.error(`Error in getting worker ${error}`);
@@ -70,10 +71,26 @@ export class FlowerService extends HttpService {
         return response.data;
     }
 
-    public async modifyPoolSize(newSize: number): Promise<PoolSizeRequestResponse|null> {
+    public async getNoOfTasksInQueue(queueName: string): Promise<number> {
+        try {
+            log(`Entered getTasksInQueue: ${queueName}`);
+            const urlPath = `api/queues/length`;
+            const response: {data: {activeQueues: Queue[]}} = await this.endpoint.get(urlPath);
+            const fileteredQueues: Queue[] = response.data.activeQueues.filter((queue) => queue.name === queueName);
+            if (fileteredQueues.length < 1) {
+                throw new Error(`Queue ${queueName} not found in celery`);
+            }
+            return fileteredQueues[0].messages!;
+        } catch (error) {
+            logger.error(`Error in getting tasks in queue: ${error}`);
+            throw error;
+        }
+    }
+
+    public async modifyPoolSize(workername: string, newSize: number): Promise<PoolSizeRequestResponse|null> {
         try {
             log(`Entered modifyPoolSize to new size: ${newSize}`);
-            const worker: Worker = (await this.getWorker())!;
+            const worker: Worker = (await this.getWorker(workername))!;
             const currentPoolSize = worker.stats.pool.processes.length;
             log(`Existing pool size: ${currentPoolSize}`);
 

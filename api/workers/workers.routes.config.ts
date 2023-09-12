@@ -21,6 +21,11 @@ export class WorkersRoutes extends CommonRoutesConfig {
 			).get(
 				WorkersController.getWorker
 			);
+		this.app
+			.route(`/queues/tasks`)
+			.get(
+				WorkersController.getNoOfTasksInQueue
+			);
 		return this.app;
 	}
 }
