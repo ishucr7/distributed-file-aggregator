@@ -1,6 +1,5 @@
 import { AxiosInstance, AxiosError } from 'axios';
-import camelcaseKeys from 'camelcase-keys';
-import snakecaseKeys from 'snakecase-keys';
+import {objectToCamel, objectToSnake} from 'ts-case-convert';
 import logger from '../logger';
 
 export interface ApiError {
@@ -16,7 +15,7 @@ export abstract class HttpService {
     this.endpoint.interceptors.request.use(
         async (config) => {
           if (config.data) {
-            config.data = snakecaseKeys(config.data, { deep: true });
+            config.data = objectToSnake(config.data);
           }
           return config;
         },
@@ -28,7 +27,7 @@ export abstract class HttpService {
 
       endpoint.interceptors.response.use(
         function (response) {
-          response.data = camelcaseKeys(response.data, { deep: true });
+          response.data = objectToCamel(response.data);
           return response;
         },
         async function (error) {
