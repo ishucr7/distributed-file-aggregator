@@ -1,7 +1,14 @@
 import { TextField } from '@mui/material';
-import Box from '@mui/material/Box';
-
+import styled from 'styled-components';
 import { UseCreateJobObject } from './create-job.hook';
+
+export const FormContainer = styled.div`
+  padding-top: 16px;
+
+  div.MuiTextField-root {
+    width: 100%;
+  }
+`;
 
 interface CreateJobFormProps {
   useCreateJobObject: UseCreateJobObject;
@@ -12,7 +19,7 @@ const CreateJobForm = ({
   const { noOfFilesState, noOfEntriesPerFileState, jobLoadingState } = useCreateJobObject;
 
   return (
-    <Box>
+    <FormContainer>
         <TextField
             disabled={jobLoadingState[0]}
             label={'No of files'}
@@ -29,7 +36,7 @@ const CreateJobForm = ({
             value={noOfEntriesPerFileState[0]}
             onChange={(e) => noOfEntriesPerFileState[1](e.target.value)}
         />
-    </Box>
+    </FormContainer>
   );
 };
 

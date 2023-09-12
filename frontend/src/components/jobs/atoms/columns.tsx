@@ -3,7 +3,7 @@ import { MUIDataTableColumn } from 'mui-datatables';
 export const JobColumnsFactory = (
 ): MUIDataTableColumn[] => [
   {
-    name: 'id',
+    name: '_id',
     label: 'Job Id'
   },
   {
