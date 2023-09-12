@@ -9,7 +9,7 @@ export interface CreateJobInput {
 }
 
 export interface Job extends CreateJobInput {
-    id: number;
+    _id: number;
     status: string;
     progress: number;
     duration: number;
@@ -53,11 +53,9 @@ export class JobService
     const urlPath = `jobs`;
     try {
       const response: {
-        data: {
-          jobs: Job[];
-        };
+        data: Job[];
       } = await this.endpoint.get(urlPath, {});
-      return ok(response.data.jobs);
+      return ok(response.data);
     } catch (error: any) {
       return err(this.getServiceError(error));
     }
