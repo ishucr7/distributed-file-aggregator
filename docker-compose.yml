@@ -24,3 +24,43 @@ services:
       - '6379:6379'
     volumes: 
       - ./utilities-data/cache:/data
+
+  worker:
+    build:
+      context: ./workers
+      dockerfile: Dockerfile
+    command: celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: dynamofl
+      RABBITMQ_PASS: dynamofl
+      BACKEND_ENDPOINT: http://host.docker.internal:3000
+    volumes:
+      - ./workers:/data
+      - /tmp/dynamofl:/tmp/dynamofl # Mounting because backend writes files this directory on machine
+    working_dir: /data
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Allows celery to communicate to backend running locally
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+
+  flower:
+    build:
+      context: ./workers
+      dockerfile: Dockerfile
+    command: celery -A main flower --broker_api=http://dynamofl:dynamofl@rabbitmq:15672/api/vhost
+    volumes:
+      - ./workers:/data
+    working_dir: /data
+    environment:
+      FLOWER_UNAUTHENTICATED_API: 'true'
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: dynamofl
+      RABBITMQ_PASS: dynamofl
+      FLOWER_PORT: 5555
+    ports:
+      - 5555:5555
+    depends_on:
+      - worker
