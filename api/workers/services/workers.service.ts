@@ -24,7 +24,7 @@ class WorkersService  {
 	async getWorkerMetrics(): Promise<WorkerMetricsDto> {
 		const noOfJobsInQueue = (await jobsService.getJobsWithStatus(JobStatus.Processing)).length;
 		const totalPoolSize = (await flowerService.getWorker(WorkerName))!.stats.pool.processes.length;
-		const startedTasks = await flowerService.getTasks(WorkerName, 'ACTIVE');
+		const startedTasks = await flowerService.getTasks(WorkerName, 'STARTED');
 		const noOfBusyProcesses = Object.keys(startedTasks).length;
 		const noOfIdleProcesses = totalPoolSize - noOfBusyProcesses;
 		const noOfTasksInQueueFromFlower = await flowerService.getNoOfTasksInQueue(QueueName);
