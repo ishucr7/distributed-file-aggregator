@@ -30,6 +30,16 @@ export interface Workers {
     [key:string]: Worker;
 }
 
+export interface Task {
+    name: string;
+    state: string;
+    worker: string
+}
+
+export interface Tasks {
+    [key:string]: Task;
+}
+
 interface PoolSizeRequestResponse {
     message: string;
 }
@@ -46,7 +56,7 @@ export class FlowerService extends HttpService {
         super(endpoint);
     }
 
-    public async getWorker(workerName: string): Promise<Worker|null> {
+    public async getWorker(workerName: string): Promise<Worker> {
         const urlPath = `api/workers`
         try {
             const response: {data: Workers} = await this.endpoint.get(urlPath, {});
@@ -55,6 +65,17 @@ export class FlowerService extends HttpService {
             return worker;
         } catch(error) {
             logger.error(`Error in getting worker ${error}`);
+            throw error;
+        }
+    }
+
+    public async getTasks(workerName: string, stateFilter: string|null = null): Promise<Tasks> {
+        const urlPath = `api/tasks?workername=${workerName}` + (stateFilter ? `&state=${stateFilter}` : ''); 
+        try {
+            const response: {data: Tasks} = await this.endpoint.get(urlPath, {});
+            return response.data;
+        } catch(error) {
+            logger.error(`Error in getting tasks ${error}`);
             throw error;
         }
     }
