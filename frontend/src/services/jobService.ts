@@ -13,6 +13,7 @@ export interface Job extends CreateJobInput {
     status: string;
     progress: number;
     duration: number;
+    totalTasks: number;
 }
   
 export interface JobServiceInterface {

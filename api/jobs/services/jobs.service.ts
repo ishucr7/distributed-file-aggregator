@@ -71,11 +71,11 @@ class JobsService implements CRUD {
 		return celeryTasks;
 	}
 
-	private async sendTasksToQueue(tasks: CeleryTask[]) {
+	private async sendTasksToQueue(jobId: string, tasks: CeleryTask[]) {
 		await redisService.incrementBy(RedisPrefixes.JobTasksInQueue, tasks.length);
+		await redisService.incrementBy(`${RedisPrefixes.JobTotalTasks}${jobId}`, tasks.length);
 		tasks.map((task) => {
 			const taskStr: string = JSON.stringify(task);
-			log(`Sending to rabbit mq, message: ${taskStr}`);
 			rabbitmqService.sendMessage(taskStr);
 		})
 	}
@@ -83,8 +83,6 @@ class JobsService implements CRUD {
 	async create(resource: CreateJobDto) {
 		let job = await JobsDao.addJob({
 			...resource,
-			progress: 0,
-			status: JobStatus.GeneratingFiles,
 		});
 		const filePaths: string[] = DataGeneratorService.generateFiles({
 			noOfFiles: resource.noOfFiles,
@@ -98,7 +96,7 @@ class JobsService implements CRUD {
 		await job.save();
 		this.addInitialFilesToJobDsu(job._id, filePaths);
 		const tasks = this.generateCeleryTasksFromFilePaths(filePaths, job._id);
-		await this.sendTasksToQueue(tasks);
+		await this.sendTasksToQueue(job._id, tasks);
 		return job;
 	}
 
@@ -168,7 +166,7 @@ class JobsService implements CRUD {
 			if(completedTaskFilesPaths.length > 0) {
 				log(`Sending completed tasks to the queue for processing`);
 				const tasks = this.generateCeleryTasksFromFilePaths(completedTaskFilesPaths, jobId);
-				await this.sendTasksToQueue(tasks);
+				await this.sendTasksToQueue(jobId, tasks);
 			}
 		}
 	}
@@ -211,6 +209,8 @@ class JobsService implements CRUD {
 				await this.performAggregation(jobId, job.noOfFiles!);
 				job.status = JobStatus.Completed;
 				job.processingCompleteTime = new Date();
+				const totalTasks = Number(await redisService.get(`${RedisPrefixes.JobTotalTasks}${jobId}`));
+				job.totalTasks = totalTasks;
 				await job.save();
 			}
 		} catch(err) {

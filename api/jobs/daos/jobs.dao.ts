@@ -15,13 +15,16 @@ export enum JobStatus {
 }
 
 class JobsDao {
-	jobs: Array<CreateJobDto> = [];
 
 	Schema = mongooseService.getMongoose().Schema;
 
 	jobSchema = new this.Schema({
 		_id: String,
 		noOfFiles: {
+			type: Number,
+			required: true,
+		},
+		totalTasks: {
 			type: Number,
 			required: true,
 		},
@@ -59,6 +62,9 @@ class JobsDao {
 		const job = new this.Job({
 			_id: jobId,
 			...jobFields,
+			progress: 0,
+			totalTasks: 0,
+			status: JobStatus.GeneratingFiles,
 			permissionFlags: 1,
 		});
 		await job.save();
@@ -84,7 +90,7 @@ class JobsDao {
 		}).exec();
 	}
 
-	async getJobs(limit = 25, page = 0) {
+	async getJobs(limit = 50, page = 0) {
 		return this.Job.find()
 			.limit(limit)
 			.skip(limit * page)
