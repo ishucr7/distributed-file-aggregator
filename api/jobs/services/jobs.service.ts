@@ -81,7 +81,7 @@ class JobsService implements CRUD {
 	}
 
 	async create(resource: CreateJobDto) {
-		let job = await JobsDao.addJob({
+		const job = await JobsDao.addJob({
 			...resource,
 		});
 		const filePaths: string[] = DataGeneratorService.generateFiles({
@@ -105,7 +105,7 @@ class JobsService implements CRUD {
 	}
 
 	async list(limit: number, page: number) {
-		return JobsDao.getJobs();
+		return JobsDao.getJobs(limit, page);
 	}
 
 	async getJobsWithStatus(status: JobStatus) {
@@ -140,7 +140,7 @@ class JobsService implements CRUD {
 		 * Initially, all root files will be added to this
 		 * In between steps, a new file will be added and old will be removed before the check happens
 		 */
-		 
+
 		await redisService.addToSet(jobSetKey, generatedFilePath);
 		processedFilesPaths.map(async (key) => {
 			await redisService.removeFromSet(jobSetKey, key);
@@ -174,7 +174,7 @@ class JobsService implements CRUD {
 	private async shouldCalculateAggregate(jobId: string): Promise<boolean> {
 		log(`shouldCalculateAggregate: entered`);
 		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
-		let jobSetValue = await redisService.getSet(jobSetKey);
+		const jobSetValue = await redisService.getSet(jobSetKey);
 		log(`jobSet : ${jobSetKey}, value: ${JSON.stringify(jobSetValue)}`);
 		const jobDsuSetSize = await redisService.getSetSize(jobSetKey);
 		if (jobDsuSetSize == 1) {

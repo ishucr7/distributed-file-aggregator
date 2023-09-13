@@ -1,9 +1,7 @@
 import express from 'express';
 import jobService from '../services/jobs.service';
-import debug from 'debug';
 import { JobStatus } from '../daos/jobs.dao';
 
-const log: debug.IDebugger = debug('app:jobs-controller');
 
 class JobsMiddleware {
 

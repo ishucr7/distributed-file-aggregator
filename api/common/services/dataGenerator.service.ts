@@ -1,10 +1,7 @@
-import debug from 'debug';
 import * as path from 'path';
 
 import {RandomNumberGenerator} from './randomNumberGenerator.service';
 import {FileService} from './file.service';
-
-const log: debug.IDebugger = debug('app:dataGenerator-service');
 
 export interface FileGeneratorConfig {
     outputDir: string;
