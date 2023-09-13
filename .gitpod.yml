@@ -1,0 +1,34 @@
+tasks:
+ - name: run docker-compose (mongoDB + RabbitMQ + Redis)
+   command: >
+      docker-compose up
+      gp sync-done utilities-up
+ - name: celery
+   command: |
+      cd workers
+      gp sync-await utilities-up
+      pip install -r requirements.txt
+      celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+      gp sync-done celery-up
+ - name: celery-flower
+   command: | 
+      cd workers
+      gp sync-await celery-up
+      export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
+ - name: backend
+   command: | 
+      cd api
+      gp sync-await celery-up
+      npm i
+      npm run debug
+      gp sync-done backend-up
+ - name: frontend
+   command: | 
+      cd frontend
+      gp sync-await backend-up
+      npm i
+      npm start
+vscode:
+  extensions:
+    - rangav.vscode-thunder-client
+    - esbenp.prettier-vscode
