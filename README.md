@@ -20,4 +20,7 @@ celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
 export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
 
 ## Snakeviz Command
-https://{devspacaeId}-8080.app.github.dev/snakeviz//tmp/dynamofl/jobs/{jobId}/profilers/task-{taskId}.prof
+codespaces
+- https://{devspacaeId}-8080.app.github.dev/snakeviz//tmp/dynamofl/jobs/{jobId}/profilers/task-{taskId}.prof
+
+doesn't work with gitpod, download file and then run
