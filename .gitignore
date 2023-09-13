@@ -1,5 +1,6 @@
 node_modules
 dist
+utilities-data
 data
 rabbitmq-data
 cache
