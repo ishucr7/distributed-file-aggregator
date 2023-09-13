@@ -1,5 +1,7 @@
 from utils.file_manager import FileManager
 from utils.parallel_processor import ParallelProcessor
+from utils.thread_processor import ThreadProcessor
+
 from utils.np import get_np_array, sum_of_arrays
 
 PARALLELIZE_EXECUTION = False
@@ -21,6 +23,12 @@ class TaskExecutor:
             arrays.append(array)
         return arrays
 
+    def _read_arrays_from_files_with_threads(self):
+        arrays = []
+        read_processor = ThreadProcessor(self.input_files, extract_array_from_file)
+        arrays = read_processor.process()
+        return arrays
+
     def _read_arrays_from_files_parallely(self):
         read_processor = ParallelProcessor(self.input_files, extract_array_from_file)
         arrays = read_processor.process()
@@ -39,6 +47,6 @@ class TaskExecutor:
             if self.file_count >= 4:
                 output_array = self._sum_parallely(arrays)
         else:
-            arrays = self._read_arrays_from_files()
+            arrays = self._read_arrays_from_files_with_threads()
             output_array = sum_of_arrays(arrays)
         FileManager.write_file(" ".join(map(str, output_array)), self.output_file_path)
