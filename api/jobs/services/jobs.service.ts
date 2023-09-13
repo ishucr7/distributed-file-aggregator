@@ -6,7 +6,7 @@ import { FileService } from '../../common/services/file.service';
 import rabbitmqService from '../../common/services/rabbitmq.service';
 import { ProcessFilesDto } from '../dto/processFiles.dto';
 import redisService from '../../common/services/redis.service';
-import { GroupingSize, RedisPrefixes } from '../../common/constants';
+import { GroupingSize, JobFileStorageDir, RedisPrefixes } from '../../common/constants';
 import debug from 'debug';
 import shortid from 'shortid';
 import jobsDao from '../daos/jobs.dao';
@@ -43,7 +43,7 @@ class JobsService implements CRUD {
 
 	private generateTaskFromGroup(group: string[], jobId: string): CeleryTask {
 		const taskId = shortid.generate();
-		const outputDir = `/tmp/dynamofl/jobs/${jobId}/tasks/${taskId}`;
+		const outputDir = `${JobFileStorageDir}/${jobId}/tasks/${taskId}`;
 		FileService.createDir(outputDir);
 		const task: Task = {
 			id: `task-${taskId}`,
@@ -87,7 +87,7 @@ class JobsService implements CRUD {
 		const filePaths: string[] = DataGeneratorService.generateFiles({
 			noOfFiles: resource.noOfFiles,
 			noOfEntriesPerFile: resource.noOfEntriesPerFile,
-			outputDir: `/tmp/dynamofl/jobs/${job._id}/`,
+			outputDir: `${JobFileStorageDir}/${job._id}/`,
 		});
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
@@ -192,7 +192,7 @@ class JobsService implements CRUD {
 		const numbers: number[] = fileContent.split(' ').map(Number);
 		const dividedNumbers: number[] = numbers.map((num) => num/noOfFiles!)
 		const finalFileResult = dividedNumbers.join(' ');
-		FileService.writeToFile(`/tmp/dynamofl/jobs/${jobId}/final.txt`, finalFileResult);
+		FileService.writeToFile(`${JobFileStorageDir}/${jobId}/final.txt`, finalFileResult);
 	}
 
 	async processFiles(jobId: string, processedFilesInput: ProcessFilesDto) {
@@ -240,8 +240,8 @@ class JobsService implements CRUD {
 		});
 		const averages = sums.map((sum) => sum / noOfFiles);
 		const outputData: string = averages.join(' ');
-		const linearFilePath: string = `/tmp/dynamofl/jobs/${jobId}/linear.txt`;
-		const outputBySystemFilePath: string = `/tmp/dynamofl/jobs/${jobId}/final.txt`;
+		const linearFilePath: string = `${JobFileStorageDir}/${jobId}/linear.txt`;
+		const outputBySystemFilePath: string = `${JobFileStorageDir}/${jobId}/final.txt`;
 		FileService.writeToFile(linearFilePath, outputData);
 		const outputBySystem: string = FileService.readFileAsStr(outputBySystemFilePath)
 		const endTime = new Date();

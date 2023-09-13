@@ -3,6 +3,7 @@ import { cleanEnv, str } from 'envalid'
 export const WorkerName = 'celery@dynamofl';
 export const QueueName = 'dynamofl';
 export const GroupingSize = 10;
+export const JobFileStorageDir = '/tmp/dynamofl/jobs';
 
 export const env = cleanEnv(process.env, {
     RABBITMQ_DEFAULT_USER: str({default: 'dynamofl'}),
