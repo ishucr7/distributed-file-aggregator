@@ -1,3 +1,3 @@
 export interface CreateWorkerDto {
-    noOfWorkers: number;
+  noOfWorkers: number;
 }

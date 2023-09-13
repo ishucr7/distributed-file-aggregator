@@ -1,4 +1,4 @@
 export interface CreateJobDto {
-    noOfFiles: number;
-    noOfEntriesPerFile: number;
+  noOfFiles: number;
+  noOfEntriesPerFile: number;
 }

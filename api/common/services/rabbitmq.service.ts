@@ -19,7 +19,7 @@ class RabbitMQService {
 
   async sendMessage(message: string): Promise<void> {
     this.channel.sendToQueue(this.queueName, Buffer.from(message), {
-      contentType: "application/json"
+      contentType: 'application/json',
     });
   }
 

@@ -5,33 +5,22 @@ import { body } from 'express-validator';
 import express from 'express';
 
 export class WorkersRoutes extends CommonRoutesConfig {
-	constructor(app: express.Application) {
-		super(app, 'WorkersRoutes');
-	}
+  constructor(app: express.Application) {
+    super(app, 'WorkersRoutes');
+  }
 
-	configureRoutes() {
-		this.app
-			.route(`/workers`)
-			.post(
-				body('noOfWorkers')
-					.isNumeric()
-					.withMessage('noOfWorkers must be provided and its value > 0'),
-				BodyValidationMiddleware.verifyBodyFieldsErrors,
-				WorkersController.modifyPoolSize
-			).get(
-				WorkersController.getWorker
-			);
-		this.app
-			.route(`/queues/tasks`)
-			.get(
-				WorkersController.getNoOfTasksInQueue
-			);
-		this.app
-			.route(`/workers/metrics`)
-			.get(
-				WorkersController.getWorkerMetrics
-			);
+  configureRoutes() {
+    this.app
+      .route(`/workers`)
+      .post(
+        body('noOfWorkers').isNumeric().withMessage('noOfWorkers must be provided and its value > 0'),
+        BodyValidationMiddleware.verifyBodyFieldsErrors,
+        WorkersController.modifyPoolSize,
+      )
+      .get(WorkersController.getWorker);
+    this.app.route(`/queues/tasks`).get(WorkersController.getNoOfTasksInQueue);
+    this.app.route(`/workers/metrics`).get(WorkersController.getWorkerMetrics);
 
-		return this.app;
-	}
+    return this.app;
+  }
 }

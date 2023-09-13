@@ -8,36 +8,36 @@ import { WorkerMetricsDto } from '../dto/metric.dto';
 import redisService from '../../common/services/redis.service';
 const log: debug.IDebugger = debug('app:worker-service');
 
-class WorkersService  {
-	async modifyPoolSize(resource: CreateWorkerDto) {
-		return await flowerService.modifyPoolSize(WorkerName, resource.noOfWorkers);
-	}
+class WorkersService {
+  async modifyPoolSize(resource: CreateWorkerDto) {
+    return await flowerService.modifyPoolSize(WorkerName, resource.noOfWorkers);
+  }
 
-	async getWorker() {
-		return await flowerService.getWorker(WorkerName);
-	}
+  async getWorker() {
+    return await flowerService.getWorker(WorkerName);
+  }
 
-	async getNoOfTasksInQueue() {
-		return await flowerService.getNoOfTasksInQueue(QueueName);
-	}
+  async getNoOfTasksInQueue() {
+    return await flowerService.getNoOfTasksInQueue(QueueName);
+  }
 
-	async getWorkerMetrics(): Promise<WorkerMetricsDto> {
-		const noOfJobsInQueue = (await jobsService.getJobsWithStatus(JobStatus.Processing)).length;
-		const totalPoolSize = (await flowerService.getWorker(WorkerName))!.stats.pool.processes.length;
-		const startedTasks = await flowerService.getTasks(WorkerName, 'STARTED');
-		const noOfBusyProcesses = Object.keys(startedTasks).length;
-		const noOfIdleProcesses = totalPoolSize - noOfBusyProcesses;
-		const noOfTasksInQueueFromFlower = await flowerService.getNoOfTasksInQueue(QueueName);
-		const noOfTasksInQueue = Number(await redisService.get(RedisPrefixes.JobTasksInQueue));
-		const workerMetrics =  {
-			noOfJobsInQueue,
-			noOfTasksInQueue,
-			noOfIdleProcesses,
-			noOfBusyProcesses
-		}
-		log(`WorkerMetrics: ${JSON.stringify(workerMetrics)}: ${noOfTasksInQueueFromFlower}`);
-		return workerMetrics;
-	}
+  async getWorkerMetrics(): Promise<WorkerMetricsDto> {
+    const noOfJobsInQueue = (await jobsService.getJobsWithStatus(JobStatus.Processing)).length;
+    const totalPoolSize = (await flowerService.getWorker(WorkerName))!.stats.pool.processes.length;
+    const startedTasks = await flowerService.getTasks(WorkerName, 'STARTED');
+    const noOfBusyProcesses = Object.keys(startedTasks).length;
+    const noOfIdleProcesses = totalPoolSize - noOfBusyProcesses;
+    const noOfTasksInQueueFromFlower = await flowerService.getNoOfTasksInQueue(QueueName);
+    const noOfTasksInQueue = Number(await redisService.get(RedisPrefixes.JobTasksInQueue));
+    const workerMetrics = {
+      noOfJobsInQueue,
+      noOfTasksInQueue,
+      noOfIdleProcesses,
+      noOfBusyProcesses,
+    };
+    log(`WorkerMetrics: ${JSON.stringify(workerMetrics)}: ${noOfTasksInQueueFromFlower}`);
+    return workerMetrics;
+  }
 }
 
 export default new WorkersService();
