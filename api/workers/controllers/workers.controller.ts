@@ -16,6 +16,11 @@ class WorkersController {
         res.status(200).send(worker);
     }
 
+    async getWorkerMetrics(req: express.Request, res: express.Response) {
+        const workerMetrics = await workersService.getWorkerMetrics();
+        res.status(200).send(workerMetrics);
+    }
+
     async getNoOfTasksInQueue(req: express.Request, res: express.Response) {
         const noOfTasks = await workersService.getNoOfTasksInQueue();
         res.status(200).send({
