@@ -10,9 +10,9 @@ import { JobService } from './services/jobService';
 
 import axios from 'axios';
 import { WorkerService } from './services/workerService';
+import { getSpacesUrl, Ports } from './utils/urls';
 
-// const apiBaseUrl = 'http://localhost:3000'
-const apiBaseUrl = 'https://special-enigma-5vv549wp5rxfwpj-3000.app.github.dev';
+const apiBaseUrl = getSpacesUrl(Ports.Backend);
 
 function App() {
   const endpoint = axios.create({
@@ -60,7 +60,25 @@ function App() {
                 workerMetrics={workerMetrics}
               />    
             )
-          }
+          },
+          {
+            label: 'Celery Flower',
+            children: (
+              <Box>
+                <iframe src={getSpacesUrl(Ports.Flower)} width="100%" height="1000px">
+                </iframe>
+              </Box>
+            )
+          },
+          {
+            label: 'RabbitMQ Management',
+            children: (
+              <Box>
+                <iframe src={getSpacesUrl(Ports.RabbitMQManagementUi)} width="100%" height="1000px">
+                </iframe>
+              </Box>
+            )
+          },          
         ]}
       />
     </Box>
