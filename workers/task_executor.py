@@ -47,6 +47,7 @@ class TaskExecutor:
             if self.file_count >= 4:
                 output_array = self._sum_parallely(arrays)
         else:
-            arrays = self._read_arrays_from_files_with_threads()
+            arrays = self._read_arrays_from_files()
+            # arrays = self._read_arrays_from_files_with_threads()
             output_array = sum_of_arrays(arrays)
         FileManager.write_file(" ".join(map(str, output_array)), self.output_file_path)
