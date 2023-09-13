@@ -1,7 +1,7 @@
 tasks:
  - name: (mongoDB + RabbitMQ + Redis)
    command: |
-      docker-compose up -d
+      docker-compose up
  - name: celery
    command: |
       cd workers
@@ -10,11 +10,11 @@ tasks:
  - name: celery-flower
    command: | 
       cd workers
+      pip install -r requirements.txt
       export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
  - name: backend
    command: | 
       cd api
-      gp sync-await celery-up
       npm i
       npm run debug
  - name: frontend
