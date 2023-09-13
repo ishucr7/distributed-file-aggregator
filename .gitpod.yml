@@ -1,7 +1,7 @@
 tasks:
  - name: run docker-compose (mongoDB + RabbitMQ + Redis)
    command: |
-      docker-compose up
+      docker-compose up -d
       gp sync-done utilities-up
  - name: celery
    command: |
