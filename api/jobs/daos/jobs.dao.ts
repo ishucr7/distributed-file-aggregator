@@ -3,6 +3,7 @@ import { CreateJobDto } from "../dto/create.job.dto";
 import debug from 'debug';
 import shortid from 'shortid';
 import { PatchJobDto } from '../dto/patch.job.dto';
+import { JobFileStorageDir } from '../../common/constants';
 
 const log: debug.IDebugger = debug('app:mongodb-dao');
 
@@ -48,6 +49,10 @@ class JobsDao {
 			requried: true
 		},
 		filePaths: [String],
+		outputFilePath: {
+			type: String,
+			requried: true
+		},
 		permissionFlags: Number,
 	}, { id: false });
 
@@ -65,6 +70,7 @@ class JobsDao {
 			progress: 0,
 			totalTasks: 0,
 			status: JobStatus.GeneratingFiles,
+			outputFilePath: `${JobFileStorageDir}/${jobId}/final.txt`,
 			permissionFlags: 1,
 		});
 		await job.save();

@@ -87,7 +87,7 @@ class JobsService implements CRUD {
 		const filePaths: string[] = DataGeneratorService.generateFiles({
 			noOfFiles: resource.noOfFiles,
 			noOfEntriesPerFile: resource.noOfEntriesPerFile,
-			outputDir: `${JobFileStorageDir}/${job._id}/`,
+			outputDir: `${JobFileStorageDir}/${job._id}/input/`,
 		});
 		job.filePaths = filePaths;
 		job.status = JobStatus.Processing;
@@ -185,14 +185,14 @@ class JobsService implements CRUD {
 		}
 	}
 
-	private async performAggregation(jobId: string, noOfFiles: number) {
+	private async performAggregation(jobId: string, noOfFiles: number, outputFilePath: string) {
 		const jobSetKey = `${RedisPrefixes.JobDsu}${jobId}`;
 		const finalSumFilePath: string = (await redisService.getSet(jobSetKey))[0];
 		const fileContent: string = FileService.readFileAsStr(finalSumFilePath);
 		const numbers: number[] = fileContent.split(' ').map(Number);
 		const dividedNumbers: number[] = numbers.map((num) => num/noOfFiles!)
 		const finalFileResult = dividedNumbers.join(' ');
-		FileService.writeToFile(`${JobFileStorageDir}/${jobId}/final.txt`, finalFileResult);
+		FileService.writeToFile(outputFilePath, finalFileResult);
 	}
 
 	async processFiles(jobId: string, processedFilesInput: ProcessFilesDto) {
@@ -206,7 +206,7 @@ class JobsService implements CRUD {
 			if (shouldCalculateAggregate) {
 				job.status = JobStatus.Aggregating;
 				await job.save();
-				await this.performAggregation(jobId, job.noOfFiles!);
+				await this.performAggregation(jobId, job.noOfFiles!, job.outputFilePath!);
 				job.status = JobStatus.Completed;
 				job.processingCompleteTime = new Date();
 				const totalTasks = Number(await redisService.get(`${RedisPrefixes.JobTotalTasks}${jobId}`));
@@ -241,14 +241,13 @@ class JobsService implements CRUD {
 		const averages = sums.map((sum) => sum / noOfFiles);
 		const outputData: string = averages.join(' ');
 		const linearFilePath: string = `${JobFileStorageDir}/${jobId}/linear.txt`;
-		const outputBySystemFilePath: string = `${JobFileStorageDir}/${jobId}/final.txt`;
 		FileService.writeToFile(linearFilePath, outputData);
-		const outputBySystem: string = FileService.readFileAsStr(outputBySystemFilePath)
+		const outputBySystem: string = FileService.readFileAsStr(job.outputFilePath!)
 		const endTime = new Date();
 		return {
 			isSame: outputBySystem === outputData,
+			outputBySystemFilePath: job.outputFilePath!,
 			linearFilePath,
-			outputBySystemFilePath,
 			linearProcessingTime: endTime.getTime() - startTime.getTime(),
 			systemProcessingTime: job.processingCompleteTime!.getTime() - job.processingStartTime!.getTime()
 		}
