@@ -1,11 +1,12 @@
-import { QueueName, WorkerName } from '../../common/constants';
+import { QueueName, RedisPrefixes, WorkerName } from '../../common/constants';
 import flowerService from '../../common/services/flower.service';
 import { JobStatus } from '../../jobs/daos/jobs.dao';
 import jobsService from '../../jobs/services/jobs.service';
 import { CreateWorkerDto } from '../dto/create.worker.dto';
 import debug from 'debug';
 import { WorkerMetricsDto } from '../dto/metric.dto';
-const log: debug.IDebugger = debug('app:job-service');
+import redisService from '../../common/services/redis.service';
+const log: debug.IDebugger = debug('app:worker-service');
 
 class WorkersService  {
 	async modifyPoolSize(resource: CreateWorkerDto) {
@@ -26,13 +27,16 @@ class WorkersService  {
 		const startedTasks = await flowerService.getTasks(WorkerName, 'ACTIVE');
 		const noOfBusyProcesses = Object.keys(startedTasks).length;
 		const noOfIdleProcesses = totalPoolSize - noOfBusyProcesses;
-		const noOfTasksInQueue = await flowerService.getNoOfTasksInQueue(QueueName);
-		return {
+		const noOfTasksInQueueFromFlower = await flowerService.getNoOfTasksInQueue(QueueName);
+		const noOfTasksInQueue = Number(await redisService.get(RedisPrefixes.JobTasksInQueue));
+		const workerMetrics =  {
 			noOfJobsInQueue,
 			noOfTasksInQueue,
 			noOfIdleProcesses,
 			noOfBusyProcesses
 		}
+		log(`WorkerMetrics: ${JSON.stringify(workerMetrics)}: ${noOfTasksInQueueFromFlower}`);
+		return workerMetrics;
 	}
 }
 

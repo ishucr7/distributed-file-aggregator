@@ -12,5 +12,6 @@ export const env = cleanEnv(process.env, {
 
 export enum RedisPrefixes {
     JobDsu = 'job-dsu-',
-    JobCompletedTaskList = 'job-completed-task-list'
+    JobCompletedTaskList = 'job-completed-task-list',
+    JobTasksInQueue = 'job-tasks-in-queue-'
 }

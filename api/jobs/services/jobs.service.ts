@@ -73,6 +73,7 @@ class JobsService implements CRUD {
 
 	private async sendTasksToQueue(tasks: CeleryTask[]) {
 		await rabbitmqService.connectToRabbitMQ();
+		await redisService.incrementBy(RedisPrefixes.JobTasksInQueue, tasks.length);
 		tasks.map((task) => {
 			const taskStr: string = JSON.stringify(task);
 			log(`Sending to rabbit mq, message: ${taskStr}`);
@@ -201,6 +202,7 @@ class JobsService implements CRUD {
 		log(`processFiles: entered with input ${JSON.stringify(processedFilesInput)}`);
 		const job = (await jobsDao.getJobById(jobId))!;
 		try {
+			await redisService.decrementBy(RedisPrefixes.JobTasksInQueue, 1);
 			await this.handleJobDsu(jobId, processedFilesInput);
 			await this.handleNewTaskGeneration(jobId, processedFilesInput);
 			const shouldCalculateAggregate = await this.shouldCalculateAggregate(jobId);
@@ -211,7 +213,7 @@ class JobsService implements CRUD {
 				job.status = JobStatus.Completed;
 				job.processingCompleteTime = new Date();
 				await job.save();
-			}	
+			}
 		} catch(err) {
 			logger.error(`Error in process files: ${err}`);
 			job.status = JobStatus.Failed;

@@ -42,6 +42,14 @@ class RedisService {
 		await this.client.del(key);
 	}
 
+	async incrementBy(key: string, value: number): Promise<void> {
+		await this.client.INCRBY(key, value);
+	}
+
+	async decrementBy(key: string, value: number): Promise<void> {
+		await this.client.DECRBY(key, value);
+	}
+
 	async addToSet(setName: string, value: string|string[]) {
 		await this.client.SADD(setName, value);
 	}
