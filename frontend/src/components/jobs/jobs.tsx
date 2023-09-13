@@ -128,6 +128,7 @@ export function JobsDashboard({
     });
     const autFetchJobs = setInterval(() => {
       fetchJobs();
+      getWorker();
     }, 4000);
     return () => clearInterval(autFetchJobs);
   }, []);
