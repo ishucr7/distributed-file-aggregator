@@ -10,7 +10,11 @@ class RedisService {
 
 	constructor() {
 		this.client = createClient({});
-		this.connectWithRetry();
+	}
+
+	async connectToRedis(): Promise<void> {
+		log('Attempting REDIS connection ');
+		await this.client.connect();
 	}
 
 	connectWithRetry = () => {

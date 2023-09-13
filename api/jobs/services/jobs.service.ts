@@ -72,7 +72,6 @@ class JobsService implements CRUD {
 	}
 
 	private async sendTasksToQueue(tasks: CeleryTask[]) {
-		await rabbitmqService.connectToRabbitMQ();
 		await redisService.incrementBy(RedisPrefixes.JobTasksInQueue, tasks.length);
 		tasks.map((task) => {
 			const taskStr: string = JSON.stringify(task);

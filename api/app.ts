@@ -9,6 +9,8 @@ import {CommonRoutesConfig} from './common/common.routes.config';
 import {JobsRoutes} from './jobs/jobs.routes.config';
 import {WorkersRoutes} from './workers/workers.routes.config';
 import debug from 'debug';
+import rabbitmqService from './common/services/rabbitmq.service';
+import redisService from './common/services/redis.service';
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
@@ -42,9 +44,11 @@ app.get('/', (req: express.Request, res: express.Response) => {
     res.status(200).send(runningMessage)
 });
 
-server.listen(port, () => {
+server.listen(port, async () => {
     routes.forEach((route: CommonRoutesConfig) => {
         debugLog(`Routes configured for ${route.getName()}`);
     });
+    await rabbitmqService.connectToRabbitMQ();
+    await redisService.connectToRedis();
     console.log(runningMessage);
 });
