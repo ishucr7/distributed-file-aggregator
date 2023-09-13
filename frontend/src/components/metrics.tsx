@@ -1,21 +1,42 @@
 import React from 'react';
 import { Grid, Paper, Typography } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import { WorkerMetrics, WorkerServiceInterface } from '../services/workerService';
 
-// Define the interface for the props
-interface MetricsProps {
-  queueMetrics: {
-    tasksInQueue: number;
-    jobsInQueue: number;
-  };
-  workerMetrics: {
-    idleWorkers: number;
-    busyWorkers: number;
-  };
+// Define the interface for the component props
+interface MetricsDashboardProps {
+  workerService: WorkerServiceInterface;
 }
 
-const MetricsComponent: React.FC<MetricsProps> = ({ queueMetrics, workerMetrics }) => {
+export function MetricsDashboard({
+  workerService
+}: MetricsDashboardProps) {
+  const [workerMetrics, setWorkerMetrics] = React.useState<WorkerMetrics>();
+  const [apiError, setApiError] = React.useState('');
+
+  const fetchWorkerMetrics = () => {
+    workerService.
+      getWorkerMetrics().
+      then((result) => {
+        result.map((data) => {
+          setWorkerMetrics(data);
+        }).mapErr((err) => {
+          setApiError(`Error in getting worker metrics ${err.message}`);
+        })
+      })
+  }
+
+  React.useEffect(() => {
+    fetchWorkerMetrics();
+    const autoFetchMetrics = setInterval(() => {
+      fetchWorkerMetrics();
+    }, 3000);
+    return () => clearInterval(autoFetchMetrics);
+  }, [])
+
   return (
     <div>
+      {apiError && <Alert severity='error' onClose={() => setApiError('')} >{apiError}</Alert>}
       <Grid container spacing={2}>
         {/* Queue Metrics */}
         <Grid item xs={6}>
@@ -24,10 +45,10 @@ const MetricsComponent: React.FC<MetricsProps> = ({ queueMetrics, workerMetrics 
               Queue Metrics
             </Typography>
             <Typography variant="body1">
-              Tasks in Queue: {queueMetrics.tasksInQueue}
+              Tasks in Queue: {workerMetrics?.noOfTasksInQueue}
             </Typography>
             <Typography variant="body1">
-              Jobs in Queue: {queueMetrics.jobsInQueue}
+              Jobs in Queue: {workerMetrics?.noOfJobsInQueue}
             </Typography>
           </Paper>
         </Grid>
@@ -39,10 +60,10 @@ const MetricsComponent: React.FC<MetricsProps> = ({ queueMetrics, workerMetrics 
               Worker Metrics
             </Typography>
             <Typography variant="body1">
-              Idle Workers: {workerMetrics.idleWorkers}
+              Idle Workers: {workerMetrics?.noOfIdleProcesses}
             </Typography>
             <Typography variant="body1">
-              Busy Workers: {workerMetrics.busyWorkers}
+              Busy Workers: {workerMetrics?.noOfBusyProcesses}
             </Typography>
           </Paper>
         </Grid>
@@ -51,4 +72,4 @@ const MetricsComponent: React.FC<MetricsProps> = ({ queueMetrics, workerMetrics 
   );
 };
 
-export default MetricsComponent;
+export default MetricsDashboard;

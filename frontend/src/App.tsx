@@ -4,7 +4,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {BaseTabs} from './components/base/tabs/tab';
-import MetricsComponent from './components/metrics';
+import MetricsDashboard from './components/metrics';
 import { JobsDashboard } from './components/jobs';
 import { JobService } from './services/jobService';
 
@@ -55,9 +55,8 @@ function App() {
           {
             label: 'Statistics',
             children: (
-              <MetricsComponent
-                queueMetrics={queueMetrics}
-                workerMetrics={workerMetrics}
+              <MetricsDashboard
+                workerService={workerService}
               />    
             )
           },

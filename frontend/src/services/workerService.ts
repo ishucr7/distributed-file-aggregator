@@ -26,9 +26,17 @@ export interface Worker {
   stats: Stats
 } 
 
+export interface WorkerMetrics {
+  noOfJobsInQueue: number;
+  noOfTasksInQueue: number;
+  noOfIdleProcesses: number;
+  noOfBusyProcesses: number;
+}
+
 export interface WorkerServiceInterface {
   modifyPoolSize(modifyPoolSizeInput: ModifyPoolSizeInput): Promise<Result<{message: string}, ApiError>>;
   getWorker(): Promise<Result<Worker, ApiError>>;
+  getWorkerMetrics(): Promise<Result<WorkerMetrics, ApiError>>;
 }
 
 export class WorkerService
@@ -53,6 +61,16 @@ export class WorkerService
     const urlPath = `workers`;
     try {
       const response: { data: Worker } = await this.endpoint.get(urlPath, {});
+      return ok(response.data);
+    } catch (error: any) {
+      return err(this.getServiceError(error));
+    }
+  };
+
+  getWorkerMetrics = async (): Promise<Result<WorkerMetrics, ApiError>> => {
+    const urlPath = `workers/metrics`;
+    try {
+      const response: { data: WorkerMetrics } = await this.endpoint.get(urlPath, {});
       return ok(response.data);
     } catch (error: any) {
       return err(this.getServiceError(error));
