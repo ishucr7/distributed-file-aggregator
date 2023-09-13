@@ -1,0 +1,65 @@
+title Job Submission and Worker Setup
+
+actor U
+participant "UI" as I
+participant "Backend" as B
+participant "Redis" as R
+participant "MongoDB" as M
+participant "RabbitMQ" as Q
+participant "Celery" as C
+participant "Flower" as F
+
+U -> I: Enter number of workers
+activate I
+I -> B: Modify number of workers
+deactivate I
+activate B
+B -> F: Modify Celery worker pool size
+deactivate B
+activate F
+F -> C: change pool size
+deactivate F
+
+U -> I: submit Job(f,n)
+activate I
+I -> B: Create job
+deactivate I
+activate B
+B -> M: Store job
+B -> R: Add filenames to 'job-dsu-set'
+B -> B: Divide job into tasks (size 5)
+B -> Q: Add those tasks to queue
+deactivate B
+
+loop Processing Tasks
+    C -> Q: get task
+	activate C
+    Q --> C: task
+    C -> C: Create sum of all files\nin task and dump into output file
+    C -> B: Process completed task
+    deactivate C
+    activate B
+    group process completed task
+    	group new tasks generation
+          B -> R: Add new file to 'job-completed-task' list
+          B -> R: Check if list size > 1
+          R --> B: Get and empty the list
+          B -> B: Generate tasks with groups \nof 5 from list
+          B -> Q: Send tasks to queue
+    	end
+       group DSU updates
+    	B->R: add new task output file to job-dsu-set
+        B->R: remove task's original input files from set
+       end
+    group Check if job ready for aggregation
+    B -> R: Check if 'job-dsu-set' size is 1
+    R --> B: Check 'job-dsu-set' size
+      alt Ready for Aggregation?
+          B -> B: Perform aggregation
+          B -> M: Mark job as done
+      else Not ready for Aggregation
+      end
+      end
+    deactivate B
+	end
+end
