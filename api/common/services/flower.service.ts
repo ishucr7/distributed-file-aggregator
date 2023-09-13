@@ -60,7 +60,7 @@ export class FlowerService extends HttpService {
         const urlPath = `api/workers`
         try {
             const response: {data: Workers} = await this.endpoint.get(urlPath, {});
-            log(`Worker api response data ${response.data}`)
+            log(`Worker api response data ${JSON.stringify(response.data)}`)
             const worker: Worker = response.data[`${workerName}`];
             return worker;
         } catch(error) {
