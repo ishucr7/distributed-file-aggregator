@@ -78,6 +78,12 @@ class JobsDao {
 		return this.Job.findOne({ _id: jobId }).exec();
 	}
 
+	async getJobsWithStatus(status: JobStatus) {
+		return this.Job.find({
+			status
+		}).exec();
+	}
+
 	async getJobs(limit = 25, page = 0) {
 		return this.Job.find()
 			.limit(limit)

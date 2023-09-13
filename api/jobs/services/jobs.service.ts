@@ -110,6 +110,10 @@ class JobsService implements CRUD {
 		return JobsDao.getJobs();
 	}
 
+	async getJobsWithStatus(status: JobStatus) {
+		return jobsDao.getJobsWithStatus(status);
+	}
+
 	async readById(id: string) {
 		return JobsDao.getJobById(id);
 	}
