@@ -1,0 +1,65 @@
+version: '3'
+services:
+  mongo:
+    image: mongo
+    volumes:
+      - ./utilities-data/mongodb:/data/db
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672" # RabbitMQ Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: dynamofl
+      RABBITMQ_DEFAULT_PASS: dynamofl
+    volumes:
+      - ./utilities-data/rabbitmq:/var/lib/rabbitmq
+
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
+    volumes: 
+      - ./utilities-data/cache:/data
+
+  worker:
+    build:
+      context: ./workers
+      dockerfile: Dockerfile
+    command: celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: dynamofl
+      RABBITMQ_PASS: dynamofl
+    volumes:
+      - ./workers:/data
+    working_dir: /data
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+
+  flower:
+    build:
+      context: ./workers
+      dockerfile: Dockerfile
+    command: celery -A main flower --broker_api=http://dynamofl:dynamofl@rabbitmq:15672/api/vhost
+    volumes:
+      - ./workers:/data
+    working_dir: /data
+    environment:
+      FLOWER_UNAUTHENTICATED_API: 'true'
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: dynamofl
+      RABBITMQ_PASS: dynamofl
+      FLOWER_PORT: 5555
+  #     - BROKER_API=http://dynamofl:dynamofl@rabbitmq:15672/api/vhost
+    ports:
+      - 5555:5555
+    depends_on:
+      - worker
