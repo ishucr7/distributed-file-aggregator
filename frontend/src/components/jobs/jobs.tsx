@@ -89,6 +89,7 @@ export function JobsDashboard({
         result
           .map((data) => {
             fetchJobs();
+            jobModalState[1](false);
             setApiSuccess(`Successfully created Job`);
           })
           .mapErr((err: { message: string }) => {
@@ -125,6 +126,10 @@ export function JobsDashboard({
     Promise.all([fetchJobs(), getWorker()]).finally(() => {
       setLoading(false);
     });
+    const autFetchJobs = setInterval(() => {
+      fetchJobs();
+    }, 4000);
+    return () => clearInterval(autFetchJobs);
   }, []);
 
 

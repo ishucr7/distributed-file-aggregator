@@ -20,6 +20,11 @@ export const JobColumnsFactory = (
   },
   {
     name: 'progress',
-    label: 'Progress'
+    label: 'Progress',
+    options: {
+      customBodyRender: (value, tableMeta, updatedValue) => {
+        return `${Math.floor(Number(value))}%`;
+      }
+    },
   }
 ];
