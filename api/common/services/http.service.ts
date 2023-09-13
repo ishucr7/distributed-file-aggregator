@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosError } from 'axios';
+import { AxiosInstance } from 'axios';
 import {objectToCamel, objectToSnake} from 'ts-case-convert';
 import logger from '../logger';
 
@@ -31,7 +31,6 @@ export abstract class HttpService {
           return response;
         },
         async function (error) {
-          const { config, message } = error;
           return Promise.reject(error);
         }
       );   

@@ -4,7 +4,7 @@ import { HttpService } from './http.service';
 import axios, { AxiosInstance } from 'axios';
 import debug from 'debug';
 
-const log: debug.IDebugger = debug('app:workers-controller');
+const log: debug.IDebugger = debug('app:flower-service');
 
 
 interface Queue {

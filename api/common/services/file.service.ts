@@ -1,7 +1,4 @@
-import debug from 'debug';
 import * as fs from 'fs';
-
-const log: debug.IDebugger = debug('app:s3-service');
 
 export class FileService {
     public static writeToFile(filePath: string, fileContent: string): void {
