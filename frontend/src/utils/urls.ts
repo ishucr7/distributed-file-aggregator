@@ -1,4 +1,4 @@
-const SpaceIdentifier = 'ishucr7-dynamoflbackend-p338tqgn3o2'
+const SpaceIdentifier = 'ishucr7-dynamoflbackend-v92lh4fe5v8'
 
 const IS_GITPOD = true;
 
