@@ -1,14 +1,14 @@
 tasks:
  - name: run docker-compose (mongoDB + RabbitMQ + Redis)
    command: |
-      docker-compose up -d
+      docker-compose up -d &&
       gp sync-done utilities-up
  - name: celery
    command: |
       cd workers
       gp sync-await utilities-up
       pip install -r requirements.txt
-      celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+      celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5 &&
       gp sync-done celery-up
  - name: celery-flower
    command: | 
@@ -20,7 +20,7 @@ tasks:
       cd api
       gp sync-await celery-up
       npm i
-      npm run debug
+      npm run debug &&
       gp sync-done backend-up
  - name: frontend
    command: | 
