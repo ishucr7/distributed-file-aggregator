@@ -2,3 +2,4 @@ structlog
 requests
 celery
 flower
+snakeviz
