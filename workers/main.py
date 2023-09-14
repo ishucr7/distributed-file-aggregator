@@ -41,10 +41,10 @@ def process_task(task):
             manage_task(task, requests_session)
         return task
     except APIError as e:
-        if e.status_code == 500:
-            logger.exception(f'API Error: Rejecting task as Backend gave 500: Error: {e}')
+        if e.status_code in [400, 500]:
+            logger.exception(f'API Error: Rejecting task as Backend gave {e.status_code}: Error: {e}')
             Reject(e, requeue=False)
-        elif e.status_code in [400, 401, 403, 429, 502, 503, 504]: # Retriable Status Codes
+        elif e.status_code in [401, 403, 429, 502, 503, 504]: # Retriable Status Codes
             logger.info(f'API Error: Retrying as status code is {e.status_code}: Original Error: {e}')
             raise e
         else:
