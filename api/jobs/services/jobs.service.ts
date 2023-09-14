@@ -253,9 +253,7 @@ class JobsService implements CRUD {
     return {
       isSame: outputBySystem === outputData,
       outputBySystemFilePath: job.outputFilePath!,
-      linearFilePath,
-      linearProcessingTime: endTime.getTime() - startTime.getTime(),
-      systemProcessingTime: job.processingCompleteTime!.getTime() - job.processingStartTime!.getTime(),
+      linearFilePath
     };
   }
 }
