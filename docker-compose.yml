@@ -16,6 +16,7 @@ services:
       RABBITMQ_DEFAULT_PASS: dynamofl
     volumes:
       - ./utilities-data/rabbitmq:/var/lib/rabbitmq
+      - ./workers/monitoring/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 30s
