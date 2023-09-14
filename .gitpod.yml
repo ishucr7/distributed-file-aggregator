@@ -27,3 +27,7 @@ ports:
     description: Grafana Dashboards
     port: 3002
     onOpen: open-browser
+  - name: Flower
+    description: Flower Celery
+    port: 5555
+    onOpen: open-browser
