@@ -8,6 +8,8 @@ logger = get_logger(__name__)
 class FileProcessingError(Exception):
     """Custom exception for file processing errors."""
     def __init__(self, message):
+        super().__init__(message)
+
 
 class TaskManager:
     def __init__(self, task):
@@ -20,6 +22,5 @@ class TaskManager:
             task_executor = TaskExecutor(self.task_file_paths, self.output_file_path)
             task_executor.execute()
         except Exception as e:
-            logger.exception()
             raise FileProcessingError(f'Error in processing file: should be retried; Error: {e}')
         send_processed_task_update(requests_session, self.job_id, self.task_file_paths, self.output_file_path)            
