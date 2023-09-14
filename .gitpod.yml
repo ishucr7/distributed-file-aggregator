@@ -17,3 +17,13 @@ vscode:
     - rangav.vscode-thunder-client
     - esbenp.prettier-vscode
     - ms-python.python
+
+ports:
+  - name: Api
+    description: Backend API
+    port: 3000
+    visibility: public
+  - name: Grafana
+    description: Grafana Dashboards
+    port: 3002
+    onOpen: open-browser
