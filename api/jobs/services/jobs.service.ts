@@ -45,7 +45,7 @@ class JobsService implements CRUD {
     const outputDir = `${JobFileStorageDir}/${jobId}/tasks/${taskId}`;
     FileService.createDir(outputDir);
     const task: Task = {
-      id: `task-${taskId}`,
+      id: taskId,
       jobId: jobId,
       filePaths: group,
       outputDir,
@@ -71,7 +71,7 @@ class JobsService implements CRUD {
   }
 
   private async sendTasksToQueue(jobId: string, tasks: CeleryTask[]) {
-    await redisService.incrementBy(RedisPrefixes.JobTasksInQueue, tasks.length);
+    await redisService.addToSet(RedisPrefixes.JobTasksInQueue, tasks.map((task) => `job-${jobId}-task-${task.args[0].id}`));
     await redisService.incrementBy(`${RedisPrefixes.JobTotalTasks}${jobId}`, tasks.length);
     tasks.map((task) => {
       const taskStr: string = JSON.stringify(task);
@@ -203,7 +203,6 @@ class JobsService implements CRUD {
       if (!isTaskAlreadyProcessed) {
         logger.info('Processing task as not already processed');
         await redisService.set(taskProcessedKey, '1');
-        await redisService.decrementBy(RedisPrefixes.JobTasksInQueue, 1);
         await this.handleJobDsu(jobId, processedFilesInput);
         await this.handleNewTaskGeneration(jobId, processedFilesInput);
         const shouldCalculateAggregate = await this.shouldCalculateAggregate(jobId);

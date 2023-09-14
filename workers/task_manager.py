@@ -14,6 +14,7 @@ class FileProcessingError(Exception):
 class TaskManager:
     def __init__(self, task):
         self.job_id = task["jobId"]
+        self.task_id = task["id"] # it's the task id of file processor system, not celery
         self.task_file_paths = task["filePaths"]
         self.output_file_path = f'{task["outputDir"]}/output.{FILE_EXTENSION}'
 
@@ -23,4 +24,4 @@ class TaskManager:
             task_executor.execute()
         except Exception as e:
             raise FileProcessingError(f'Error in processing file: should be retried; Error: {e}')
-        send_processed_task_update(requests_session, self.job_id, self.task_file_paths, self.output_file_path)            
+        send_processed_task_update(requests_session, self.job_id, self.task_id, self.task_file_paths, self.output_file_path)            
