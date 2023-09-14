@@ -4,6 +4,12 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+class APIError(Exception):
+    """Custom exception for API-related errors."""
+    def __init__(self, message, status_code):
+        super().__init__(message)
+        self.status_code = status_code
+
 def send_processed_task_update(requests_session, job_id, processed_files_paths, generated_file_path):
     data = {
         'processedFilesPaths': processed_files_paths,
@@ -19,4 +25,4 @@ def send_processed_task_update(requests_session, job_id, processed_files_paths, 
         logger.info('POST request was successful. Response:')
         logger.info(response.text)
     else:
-        raise Exception(f'Request to backend for processed files failed; Status Code {response.status_code}: Response: {response.text}')
+        raise APIError(f'Request to backend for processed files failed; Status Code {response.status_code}: Response: {response.text}', response.status_code)
