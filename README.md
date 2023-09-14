@@ -18,8 +18,12 @@
     - Flower
     - RabbitMQ server
 - Grafana: Contains 2 dashboards to display metrics
-    - Celery Dashboard
-    - RabbitMQ Dashboard
+    - The dashboards and the datasources are provisioned in the github repo itslef(IAC)
+        - This means you don't have to create data sources or dashboards when you set this up somewher else
+        - It'll automatically be there
+    - Dashboards
+        - Celery Dashboard
+        - RabbitMQ Dashboard
 - Profiling: Snakeviz library to profile individual tasks
 
 ### Containerization
@@ -54,6 +58,24 @@
     - Checks if the size > 1:
         - retreives the entire list, creates groups of 5 and submits them as task to the queue
     - Checks if the job is ready for aggregation, if yes then performs average and stores the final file
+
+## Optimizations at different places
+- Reading files in the task via multithreading as it's IO intensive
+- Create session of requests in the main celery task and pass it on for requests instead of creating a new connection
+- Setting up redis and rabbitmq connection on backend initially with api server and not everytime we call the api.
+
+## Dev Tools
+- .gitpod.yml is setup with tasks configured to
+    - automatically launch the following 3 terminals with preset commands when you open gitpod to launc
+        - docker compose
+        - backend
+        - frontend
+    - make backend port public to be accessed by frontend
+    - open frontend and grafana dashboard
+- eslint and prettier setup in the backend express js project with scripts in package.json
+- Profiling done for backend tasks
+    - Helped me identify that backend needed scaling so I then started using 4 CPU cores than 2 which improved performance
+    - Profiling results can be viewed using snakeviz python library
 
 
 ## [Ignore] Some commands used while developing
