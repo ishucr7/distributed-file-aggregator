@@ -1,26 +1,62 @@
-# dynamofl
+# DFL: File Processor
 
-# Metrics to Display
+## Primary Goal
+- Calculate average of a large number of files by processing them via workers taking load from a queue
 
-## Workers
-- no. of workers busy
-- no. of workers free
+## Tech Stack Used
+### Core
+- Backend: ExpressJS + Typescript
+- DB: MongoDB
+- Temp DB: REDIS
+- Frontend: React + Typescript
+- Queue: RabbitMQ
+- Worker Framework: Celery
 
-## Jobs
-- no. of jobs in queue
-- no. of jobs completed
-- no. of tasks completed of a job
+### Monitoring
+- Flower: monitoring celery
+- Prometheus: To scrape
+    - Flower
+    - RabbitMQ server
+- Grafana: Contains 2 dashboards to display metrics
+    - Celery Dashboard
+    - RabbitMQ Dashboard
+- Profiling: Snakeviz library to profile individual tasks
 
-## Queue
-- no. of tasks in queue
-- no. of tasks of a job in queue
+### Containerization
+- Docker: a docker-compose file with following services
+    - MongoDB
+    - REDIS
+    - Celery
+    - Flower
+    - Prometheus
+    - Grafana
+- Backend and Frontend aren't dockerized yet
 
-## Celery command
-celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
-export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
 
-## Snakeviz Command
-codespaces
-- https://{devspacaeId}-8080.app.github.dev/snakeviz//tmp/dynamofl/jobs/{jobId}/profilers/task-{taskId}.prof
+## Input
+- W: Number of workers to use
+- Job
+    - F: Number of files to process
+    - C: Number of entries per file
+### Slight Catch: Data Simulation
+- It's the system's duty to generate F files with C entries each with random data to be processed
 
-doesn't work with gitpod, download file and then run
+
+## Core Algorithm
+- Distributed file processing with the help of workers by using a queue.
+
+### Steps
+- Initially take all files, divide into groups of 5, creates a task for each group, submits the task into the queue
+- A worker's process, calculates the sum of the files associated with the tasks and informs backend that I'm done
+- Backend upon receiving this request does 4 things
+    - Updates the DSU: Needed for checking when the job would be finished
+    - Adds the task to the list of completed tasks:
+    - Checks if the size > 1:
+        - retreives the entire list, creates groups of 5 and submits them as task to the queue
+    - Checks if the job is ready for aggregation, if yes then performs average and stores the final file
+
+
+## [Ignore] Some commands used while developing
+- Celery command
+    - celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+    - export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
