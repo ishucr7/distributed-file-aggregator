@@ -32,7 +32,7 @@ def profiled_task(task, requests_session):
     profiler_path = f'{profiler_directory_path}{task["id"]}.prof'
     profiler.dump_stats(profiler_path)
 
-@app.task(serializer='json', name='process-job', autoretry_for=(APIError, FileProcessingError), retry_backoff=True, max_retries=3)
+@app.task(serializer='json', name='process-job', autoretry_for=(APIError, FileProcessingError), retry_backoff=True, max_retries=3, acks_late=True)
 def process_task(task):
     try:
         if ENABLE_PROFILING:
@@ -43,15 +43,15 @@ def process_task(task):
     except APIError as e:
         if e.status_code == 500:
             logger.exception(f'API Error: Rejecting task as Backend gave 500: Error: {e}')
-            Reject(requeue=False)
+            Reject(e, requeue=False)
         elif e.status_code in [400, 401, 403, 429, 502, 503, 504]: # Retriable Status Codes
             logger.info(f'API Error: Retrying as status code is {e.status_code}: Original Error: {e}')
             raise e
         else:
             logger.exception(f'API Error: Rejecting task as Backend gave {e.status_code}; Error: {e}')
-            Reject(requeue=False)
+            Reject(e, requeue=False)
     except FileProcessingError:
         raise
     except Exception as e:
         logger.exception(f'Unkown Error: Rejecting; Error: {e}')
-        Reject(requeue=False)
+        Reject(e, requeue=False)
