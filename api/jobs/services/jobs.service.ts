@@ -198,19 +198,27 @@ class JobsService implements CRUD {
     log(`processFiles: entered with input ${JSON.stringify(processedFilesInput)}`);
     const job = (await jobsDao.getJobById(jobId))!;
     try {
-      await redisService.decrementBy(RedisPrefixes.JobTasksInQueue, 1);
-      await this.handleJobDsu(jobId, processedFilesInput);
-      await this.handleNewTaskGeneration(jobId, processedFilesInput);
-      const shouldCalculateAggregate = await this.shouldCalculateAggregate(jobId);
-      if (shouldCalculateAggregate) {
-        job.status = JobStatus.Aggregating;
-        await job.save();
-        await this.performAggregation(jobId, job.noOfFiles!, job.outputFilePath!);
-        job.status = JobStatus.Completed;
-        job.processingCompleteTime = new Date();
-        const totalTasks = Number(await redisService.get(`${RedisPrefixes.JobTotalTasks}${jobId}`));
-        job.totalTasks = totalTasks;
-        await job.save();
+      const taskProcessedKey = `${RedisPrefixes.ProcessedTasks}${processedFilesInput.generatedFilePath}`;
+      const isTaskAlreadyProcessed = await redisService.get(taskProcessedKey);
+      if (!isTaskAlreadyProcessed) {
+        logger.info('Processing task as not already processed');
+        await redisService.set(taskProcessedKey, '1');
+        await redisService.decrementBy(RedisPrefixes.JobTasksInQueue, 1);
+        await this.handleJobDsu(jobId, processedFilesInput);
+        await this.handleNewTaskGeneration(jobId, processedFilesInput);
+        const shouldCalculateAggregate = await this.shouldCalculateAggregate(jobId);
+        if (shouldCalculateAggregate) {
+          job.status = JobStatus.Aggregating;
+          await job.save();
+          await this.performAggregation(jobId, job.noOfFiles!, job.outputFilePath!);
+          job.status = JobStatus.Completed;
+          job.processingCompleteTime = new Date();
+          const totalTasks = Number(await redisService.get(`${RedisPrefixes.JobTotalTasks}${jobId}`));
+          job.totalTasks = totalTasks;
+          await job.save();  
+        }
+      } else {
+        logger.info(`Already processed task for job: ${jobId}, so ignoring it`);
       }
     } catch (err) {
       logger.error(`Error in process files: ${err}`);
