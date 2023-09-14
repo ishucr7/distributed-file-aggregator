@@ -14,7 +14,10 @@ class RabbitMQService {
   async connectToRabbitMQ(): Promise<void> {
     this.connection = await amqp.connect(this.rabbitMQUrl);
     this.channel = await this.connection.createChannel();
-    await this.channel.assertQueue(this.queueName);
+    await this.channel.assertQueue(this.queueName, {
+      deadLetterExchange: `${this.queueName}.deadletter`,
+      deadLetterRoutingKey: `${this.queueName}.deadletter`
+    });
   }
 
   async sendMessage(message: string): Promise<void> {
