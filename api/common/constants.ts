@@ -16,4 +16,5 @@ export enum RedisPrefixes {
   JobCompletedTaskList = 'job-completed-task-list',
   JobTasksInQueue = 'job-tasks-in-queue-',
   JobTotalTasks = 'job-total-tasks-',
+  ProcessedTasks = 'task-processed-'
 }
