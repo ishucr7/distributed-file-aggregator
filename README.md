@@ -76,6 +76,9 @@
 - Profiling done for backend tasks
     - Helped me identify that backend needed scaling so I then started using 4 CPU cores than 2 which improved performance
     - Profiling results can be viewed using snakeviz python library
+- Following VSCode extensions
+    - ThunderClient: VS Code Extension for something similar to Postman
+    - Docker: Manage individual containers of docker-compose
 
 
 ## [Ignore] Some commands used while developing
