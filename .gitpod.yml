@@ -16,3 +16,4 @@ vscode:
   extensions:
     - rangav.vscode-thunder-client
     - esbenp.prettier-vscode
+    - ms-python.python
