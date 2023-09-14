@@ -12,9 +12,9 @@ class APIError(Exception):
 
 def send_processed_task_update(requests_session, job_id, task_id, processed_files_paths, generated_file_path):
     data = {
-        'task_id': task_id,
-        'processed_files_paths': processed_files_paths,
-        'generated_file_path': generated_file_path
+        'taskId': task_id,
+        'processedFilesPaths': processed_files_paths,
+        'generatedFilePath': generated_file_path
     }
     json_data = json.dumps(data)
     headers = {
