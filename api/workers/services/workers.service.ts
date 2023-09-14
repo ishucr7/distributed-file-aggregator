@@ -28,7 +28,7 @@ class WorkersService {
     const noOfBusyProcesses = Object.keys(startedTasks).length;
     const noOfIdleProcesses = totalPoolSize - noOfBusyProcesses;
     const noOfTasksInQueueFromFlower = await flowerService.getNoOfTasksInQueue(QueueName);
-    const noOfTasksInQueue = Number(await redisService.get(RedisPrefixes.JobTasksInQueue));
+    const noOfTasksInQueue = Number(await redisService.getSetSize(RedisPrefixes.JobTasksInQueue));
     const workerMetrics = {
       noOfJobsInQueue,
       noOfTasksInQueue,
