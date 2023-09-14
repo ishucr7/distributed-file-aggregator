@@ -28,7 +28,7 @@ services:
     build:
       context: ./workers
       dockerfile: Dockerfile
-    command: celery -A main worker --loglevel=INFO -Q dynamofl -n dynamofl --concurrency 5
+    command: celery -A main worker --loglevel=INFO -n dynamofl --concurrency 5
     environment:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: dynamofl
