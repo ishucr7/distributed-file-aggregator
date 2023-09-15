@@ -80,6 +80,39 @@
     - ThunderClient: VS Code Extension for something similar to Postman
     - Docker: Manage individual containers of docker-compose
 
+## How to set up?
+There are 2 options
+### Locally
+#### Pre-requisites
+- Install
+    - docker
+    - npm
+#### Steps
+- docker
+`docker-compose up`
+
+- backend
+```
+cd api
+npm i
+npm run debug
+```
+
+- frontend
+```
+cd frontend
+npm i
+npm start
+```
+
+### Gitpod
+- Open gitpod, it'll automatically open 3 terminals
+    - Docker compose
+    - Backend: You'll have to restart this once the docker-compose's containers are ready
+    - Frontend
+
+## Sequence Diagram
+![Sequence Diagram](./assets/sequence_diagram.png)
 
 ## [Ignore] Some commands used while developing
 - Celery command
@@ -87,3 +120,4 @@
     - export FLOWER_UNAUTHENTICATED_API=true && celery -A main flower --broker_api=http://dynamofl:dynamofl@localhost:15672/api/vhost
 - Permission for directory command
     - sudo chown -R gitpod /tmp/dynamofl
+
